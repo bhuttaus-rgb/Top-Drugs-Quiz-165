@@ -22,6 +22,7 @@ def init_firebase():
     return db.reference("rooms")
 
 rooms_ref = init_firebase()
+leaderboard_ref = db.reference("leaderboard")
 
 # ---------- App ----------
 st.set_page_config(page_title="Drug Quiz Battle", page_icon="💊")
@@ -302,6 +303,7 @@ def reset_room_state(room_ref):
         "buzzer": "",
         "steal_turn": "",
         "turn_deadline": 0,
+        "winner_recorded": False,
         "questions": build_game_questions()
     })
 
@@ -313,6 +315,44 @@ def player_label(role):
 
 def get_player_name(room_data, role):
     return room_data.get(role, "")
+
+def record_win(winner_name):
+    if not winner_name:
+        return
+
+    player_ref = leaderboard_ref.child(winner_name)
+    data = player_ref.get()
+
+    if data is None:
+        player_ref.set({"wins": 1})
+    else:
+        current_wins = data.get("wins", 0)
+        player_ref.update({"wins": current_wins + 1})
+
+def get_leaderboard():
+    data = leaderboard_ref.get()
+    if not data:
+        return []
+
+    rows = []
+    for player, stats in data.items():
+        rows.append({
+            "name": player,
+            "wins": stats.get("wins", 0)
+        })
+
+    rows.sort(key=lambda x: x["wins"], reverse=True)
+    return rows
+
+# ---------- Leaderboard ----------
+st.subheader("Leaderboard")
+leaderboard = get_leaderboard()
+
+if leaderboard:
+    for i, player in enumerate(leaderboard[:10], start=1):
+        st.write(f"{i}. {player['name']} — {player['wins']} win(s)")
+else:
+    st.write("No wins recorded yet.")
 
 # ---------- Inputs ----------
 name = st.text_input("Your name")
@@ -343,6 +383,7 @@ if st.button("Join Room"):
                 "buzzer": "",
                 "steal_turn": "",
                 "turn_deadline": 0,
+                "winner_recorded": False,
                 "questions": build_game_questions()
             })
             st.success(f"{name} joined {room} as Player 1")
@@ -382,7 +423,6 @@ if room_data:
 if room_data:
     room_ref = rooms_ref.child(room)
 
-    # Handle timer expiration
     now = time.time()
     buzzer = room_data.get("buzzer", "")
     steal_turn = room_data.get("steal_turn", "")
@@ -429,12 +469,27 @@ if room_data:
 
         p1 = room_data.get("score1", 0)
         p2 = room_data.get("score2", 0)
+
         if p1 > p2:
+            winner_name = room_data.get("player1", "Player 1")
+
+            if not room_data.get("winner_recorded", False):
+                record_win(winner_name)
+                room_ref.update({"winner_recorded": True})
+
             st.balloons()
-            st.success(f"🏆 {room_data.get('player1', 'Player 1')} wins!")
+            st.success(f"🏆 {winner_name} wins!")
+
         elif p2 > p1:
+            winner_name = room_data.get("player2", "Player 2")
+
+            if not room_data.get("winner_recorded", False):
+                record_win(winner_name)
+                room_ref.update({"winner_recorded": True})
+
             st.balloons()
-            st.success(f"🏆 {room_data.get('player2', 'Player 2')} wins!")
+            st.success(f"🏆 {winner_name} wins!")
+
         else:
             st.info("🤝 It's a tie!")
 
@@ -446,7 +501,6 @@ if room_data:
     if steal_turn:
         st.write("Steal Turn:", player_label(steal_turn))
 
-    # Timer display
     if deadline and current_question and (buzzer or steal_turn):
         seconds_left = max(0, int(deadline - time.time()) + (1 if deadline - time.time() > 0 else 0))
         st.write(f"⏱️ Time left: {seconds_left}s")
@@ -454,7 +508,6 @@ if room_data:
             st.warning("⏰ HURRY!")
 
     if current_question:
-        # No one buzzed yet
         if buzzer == "" and steal_turn == "":
             if st.button("🔴 Buzz"):
                 if player_role:
@@ -464,7 +517,6 @@ if room_data:
                     })
                     st.rerun()
 
-        # Steal turn active
         elif steal_turn:
             if player_role == steal_turn:
                 st.warning("Steal chance! Pick an answer in 5 seconds.")
@@ -499,7 +551,6 @@ if room_data:
             else:
                 st.warning("Other player is attempting the steal.")
 
-        # Normal answer turn
         else:
             if player_role == buzzer:
                 st.success("You buzzed first! Pick an answer in 5 seconds.")
