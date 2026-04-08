@@ -39,8 +39,8 @@ def generate_room_code():
 WRONG_MESSAGES = [
     "Move to Florida 😬",
     "Dipiro would be disappointed 😭",
-    "You might wanna review that one 👀",
-    "My cat would have gotten 😅",
+    "Lock in bruh what was that 👀",
+    "My cat would have gotten that 😅",
     "Pharm police watching 🚨",
     "Are you DA right now 😭"
 ]
