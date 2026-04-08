@@ -25,7 +25,7 @@ rooms_ref = init_firebase()
 leaderboard_ref = db.reference("leaderboard")
 
 # ---------- App ----------
-st.set_page_config(page_title="War on Drugs", page_icon="💊")
+st.set_page_config(page_title="War on Drugs", page_icon="⚔️")
 st.title("War on Drugs")
 
 # Auto-refresh every 1 second so timer/state updates across both players
