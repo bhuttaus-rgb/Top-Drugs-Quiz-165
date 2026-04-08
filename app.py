@@ -25,7 +25,7 @@ rooms_ref = init_firebase()
 leaderboard_ref = db.reference("leaderboard")
 
 # ---------- App ----------
-st.set_page_config(page_title="War on Drugs", page_icon="⚔️")
+st.set_page_config(page_title="War on Drugs", page_icon="💊")
 st.title("War on Drugs")
 
 # Auto-refresh every 1 second so timer/state updates across both players
@@ -34,6 +34,16 @@ st_autorefresh(interval=1000, key="battle_refresh")
 # ---------- Room Code Generator ----------
 def generate_room_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+# ---------- Wrong Answer Messages ----------
+WRONG_MESSAGES = [
+    "Oof… that hurt 😬",
+    "Dipiro would be disappointed 😭",
+    "You might wanna review that one 👀",
+    "Not quite 😅",
+    "Pharm police watching 🚨",
+    "Are you DA right now 😭"
+]
 
 # ---------- Master question bank ----------
 MASTER_QUESTIONS = [
@@ -304,6 +314,7 @@ def reset_room_state(room_ref):
         "steal_turn": "",
         "turn_deadline": 0,
         "winner_recorded": False,
+        "feedback": "",
         "questions": build_game_questions()
     })
 
@@ -411,6 +422,7 @@ if st.button("Join Room"):
                 "steal_turn": "",
                 "turn_deadline": 0,
                 "winner_recorded": False,
+                "feedback": "",
                 "questions": build_game_questions()
             })
             st.success(f"{name} joined {room} as Player 1")
@@ -461,13 +473,15 @@ if room_data:
                 "current_question": room_data.get("current_question", 0) + 1,
                 "buzzer": "",
                 "steal_turn": "",
-                "turn_deadline": 0
+                "turn_deadline": 0,
+                "feedback": "Time's up! Moving to the next question ⏭️"
             })
             st.rerun()
         elif buzzer:
             room_ref.update({
                 "steal_turn": other_player(buzzer),
-                "turn_deadline": time.time() + 5
+                "turn_deadline": time.time() + 5,
+                "feedback": "⚡ Steal opportunity!"
             })
             st.rerun()
 
@@ -481,6 +495,15 @@ if room_data:
     st.write("Player 2:", room_data.get("player2", ""))
     st.write("Score 1:", room_data.get("score1", 0))
     st.write("Score 2:", room_data.get("score2", 0))
+
+    feedback = room_data.get("feedback", "")
+    if feedback:
+        if "correct" in feedback.lower():
+            st.success(feedback)
+        elif "wrong" in feedback.lower() or "dipiro" in feedback.lower() or "oof" in feedback.lower() or "da" in feedback.lower():
+            st.error(feedback)
+        else:
+            st.info(feedback)
 
     questions = room_data.get("questions", [])
     q_index = room_data.get("current_question", 0)
@@ -540,7 +563,8 @@ if room_data:
                 if player_role:
                     room_ref.update({
                         "buzzer": player_role,
-                        "turn_deadline": time.time() + 5
+                        "turn_deadline": time.time() + 5,
+                        "feedback": ""
                     })
                     st.rerun()
 
@@ -557,7 +581,8 @@ if room_data:
                                     "current_question": q_index + 1,
                                     "buzzer": "",
                                     "steal_turn": "",
-                                    "turn_deadline": 0
+                                    "turn_deadline": 0,
+                                    "feedback": f"{name} got it correct! ✅"
                                 })
                             else:
                                 room_ref.update({
@@ -565,14 +590,16 @@ if room_data:
                                     "current_question": q_index + 1,
                                     "buzzer": "",
                                     "steal_turn": "",
-                                    "turn_deadline": 0
+                                    "turn_deadline": 0,
+                                    "feedback": f"{name} got it correct! ✅"
                                 })
                         else:
                             room_ref.update({
                                 "current_question": q_index + 1,
                                 "buzzer": "",
                                 "steal_turn": "",
-                                "turn_deadline": 0
+                                "turn_deadline": 0,
+                                "feedback": random.choice(WRONG_MESSAGES)
                             })
                         st.rerun()
             else:
@@ -591,7 +618,8 @@ if room_data:
                                     "current_question": q_index + 1,
                                     "buzzer": "",
                                     "steal_turn": "",
-                                    "turn_deadline": 0
+                                    "turn_deadline": 0,
+                                    "feedback": f"{name} got it correct! ✅"
                                 })
                             else:
                                 room_ref.update({
@@ -599,12 +627,14 @@ if room_data:
                                     "current_question": q_index + 1,
                                     "buzzer": "",
                                     "steal_turn": "",
-                                    "turn_deadline": 0
+                                    "turn_deadline": 0,
+                                    "feedback": f"{name} got it correct! ✅"
                                 })
                         else:
                             room_ref.update({
                                 "steal_turn": other_player(player_role),
-                                "turn_deadline": time.time() + 5
+                                "turn_deadline": time.time() + 5,
+                                "feedback": random.choice(WRONG_MESSAGES)
                             })
                         st.rerun()
             else:
@@ -617,7 +647,8 @@ if room_data:
             room_ref.update({
                 "buzzer": "",
                 "steal_turn": "",
-                "turn_deadline": 0
+                "turn_deadline": 0,
+                "feedback": ""
             })
             st.rerun()
 
