@@ -26,7 +26,7 @@ leaderboard_ref = db.reference("leaderboard")
 
 # ---------- App ----------
 st.set_page_config(page_title="War on Drugs", page_icon="💊")
-st.title("Drug Quiz Battle")
+st.title("War on Drugs")
 
 # Auto-refresh every 1 second so timer/state updates across both players
 st_autorefresh(interval=1000, key="battle_refresh")
