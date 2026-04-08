@@ -1,4 +1,5 @@
 import random
+import string
 import time
 import streamlit as st
 import firebase_admin
@@ -29,8 +30,11 @@ st.title("Drug Quiz Battle")
 # Auto-refresh every 1 second so timer/state updates across both players
 st_autorefresh(interval=1000, key="battle_refresh")
 
-# ---------- Master question bank (mixed types from your PDF) ----------
+# ---------- Room Code Generator ----------
+def generate_room_code():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
+# ---------- Master question bank ----------
 MASTER_QUESTIONS = [
     {
         "q": "What is the mechanism of action of bisacodyl?",
@@ -290,7 +294,7 @@ def build_game_questions(num_questions=10):
 
     return selected
 
-def reset_room_state(room_ref, room_data):
+def reset_room_state(room_ref):
     room_ref.update({
         "score1": 0,
         "score2": 0,
@@ -312,12 +316,19 @@ def get_player_name(room_data, role):
 
 # ---------- Inputs ----------
 name = st.text_input("Your name")
-room = st.text_input("Room code", value="ROOM123").strip().upper()
+
+if "room_code" not in st.session_state:
+    st.session_state.room_code = generate_room_code()
+
+room = st.text_input("Room code", value=st.session_state.room_code).strip().upper()
+st.caption("Share this room code with your opponent")
 
 # ---------- Join Room ----------
 if st.button("Join Room"):
     if not name.strip():
         st.error("Enter your name first.")
+    elif not room:
+        st.error("Enter a room code.")
     else:
         room_ref = rooms_ref.child(room)
         room_data = room_ref.get()
@@ -358,7 +369,7 @@ if st.button("Join Room"):
                 st.error("Room is full.")
 
 # ---------- Load Room ----------
-room_data = rooms_ref.child(room).get()
+room_data = rooms_ref.child(room).get() if room else None
 
 player_role = None
 if room_data:
@@ -379,7 +390,6 @@ if room_data:
 
     if deadline and now > deadline:
         if steal_turn:
-            # steal timer expired -> move next question
             room_ref.update({
                 "current_question": room_data.get("current_question", 0) + 1,
                 "buzzer": "",
@@ -388,14 +398,12 @@ if room_data:
             })
             st.rerun()
         elif buzzer:
-            # buzzer winner timed out -> other player gets steal chance
             room_ref.update({
                 "steal_turn": other_player(buzzer),
                 "turn_deadline": time.time() + 5
             })
             st.rerun()
 
-    # Reload after any timer-triggered update
     room_data = room_ref.get()
     buzzer = room_data.get("buzzer", "")
     steal_turn = room_data.get("steal_turn", "")
@@ -412,6 +420,7 @@ if room_data:
 
     if q_index < len(questions):
         current_question = questions[q_index]
+        st.write(f"Question {q_index + 1} of {len(questions)}")
         st.write("### Question")
         st.write(current_question["q"])
     else:
@@ -421,13 +430,19 @@ if room_data:
         p1 = room_data.get("score1", 0)
         p2 = room_data.get("score2", 0)
         if p1 > p2:
+            st.balloons()
             st.success(f"🏆 {room_data.get('player1', 'Player 1')} wins!")
         elif p2 > p1:
+            st.balloons()
             st.success(f"🏆 {room_data.get('player2', 'Player 2')} wins!")
         else:
             st.info("🤝 It's a tie!")
 
-    st.write("Buzzer:", buzzer if buzzer else "None")
+    if buzzer:
+        st.write(f"⚡ {get_player_name(room_data, buzzer)} buzzed!")
+    else:
+        st.write("Buzzer: None")
+
     if steal_turn:
         st.write("Steal Turn:", player_label(steal_turn))
 
@@ -435,6 +450,8 @@ if room_data:
     if deadline and current_question and (buzzer or steal_turn):
         seconds_left = max(0, int(deadline - time.time()) + (1 if deadline - time.time() > 0 else 0))
         st.write(f"⏱️ Time left: {seconds_left}s")
+        if seconds_left <= 2:
+            st.warning("⏰ HURRY!")
 
     if current_question:
         # No one buzzed yet
@@ -528,8 +545,9 @@ if room_data:
 
     with col2:
         if st.button("New Game"):
-            reset_room_state(room_ref, room_data)
+            reset_room_state(room_ref)
+            st.session_state.room_code = generate_room_code()
             st.rerun()
 
 else:
-    st.info("No room data yet.")
+    st.info("Join or create a room to start playing.")
