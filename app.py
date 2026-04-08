@@ -344,15 +344,42 @@ def get_leaderboard():
     rows.sort(key=lambda x: x["wins"], reverse=True)
     return rows
 
-# ---------- Leaderboard ----------
-st.subheader("Leaderboard")
+# ---------- Pretty Leaderboard ----------
+st.subheader("🏆 Leaderboard")
 leaderboard = get_leaderboard()
 
 if leaderboard:
+    total_players = len(leaderboard)
+    total_wins = sum(player["wins"] for player in leaderboard)
+
+    col1, col2 = st.columns(2)
+    col1.metric("Players", total_players)
+    col2.metric("Total Wins", total_wins)
+
+    medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+
     for i, player in enumerate(leaderboard[:10], start=1):
-        st.write(f"{i}. {player['name']} — {player['wins']} win(s)")
+        badge = medals.get(i, f"{i}.")
+        st.markdown(
+            f"""
+            <div style="
+                padding:10px 14px;
+                margin-bottom:8px;
+                border:1px solid #e6e6e6;
+                border-radius:12px;
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                background-color:#fafafa;
+            ">
+                <div style="font-size:18px;">{badge} <b>{player['name']}</b></div>
+                <div style="font-size:16px;"><b>{player['wins']}</b> win(s)</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 else:
-    st.write("No wins recorded yet.")
+    st.info("No wins recorded yet.")
 
 # ---------- Inputs ----------
 name = st.text_input("Your name")
