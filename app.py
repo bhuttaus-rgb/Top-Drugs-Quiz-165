@@ -1,0 +1,535 @@
+import random
+import time
+import streamlit as st
+import firebase_admin
+from firebase_admin import credentials, db
+from streamlit_autorefresh import st_autorefresh
+
+# ---------- Firebase ----------
+@st.cache_resource
+def init_firebase():
+    config = dict(st.secrets["firebase"])
+    config["private_key"] = config["private_key"].replace("\\n", "\n")
+
+    if not firebase_admin._apps:
+        cred = credentials.Certificate(config)
+        firebase_admin.initialize_app(
+            cred,
+            {"databaseURL": config["database_url"]}
+        )
+
+    return db.reference("rooms")
+
+rooms_ref = init_firebase()
+
+# ---------- App ----------
+st.set_page_config(page_title="Drug Quiz Battle", page_icon="💊")
+st.title("Drug Quiz Battle")
+
+# Auto-refresh every 1 second so timer/state updates across both players
+st_autorefresh(interval=1000, key="battle_refresh")
+
+# ---------- Master question bank (mixed types from your PDF) ----------
+
+MASTER_QUESTIONS = [
+    {
+        "q": "What is the mechanism of action of bisacodyl?",
+        "choices": ["Stimulant laxative", "Stool softener", "Fiber laxative", "Hyperosmotic laxative"],
+        "a": "Stimulant laxative"
+    },
+    {
+        "q": "Which drug is used for IBS and is an antimuscarinic?",
+        "choices": ["Dicyclomine", "Loperamide", "Senna", "Rifaximin"],
+        "a": "Dicyclomine"
+    },
+    {
+        "q": "What is the brand name of docusate?",
+        "choices": ["Colace", "Dulcolax", "Linzess", "Imodium AD"],
+        "a": "Colace"
+    },
+    {
+        "q": "Which drug is a guanylate cyclase agonist?",
+        "choices": ["Linaclotide", "Lubiprostone", "Psyllium", "Polyethylene glycol"],
+        "a": "Linaclotide"
+    },
+    {
+        "q": "Which drug treats diarrhea but does not treat the underlying cause?",
+        "choices": ["Loperamide", "Rifaximin", "Docusate", "Bisacodyl"],
+        "a": "Loperamide"
+    },
+    {
+        "q": "Which drug is a chloride channel activator?",
+        "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Senna"],
+        "a": "Lubiprostone"
+    },
+    {
+        "q": "What is the mechanism of polyethylene glycol?",
+        "choices": ["Hyperosmotic laxative", "Stimulant laxative", "Stool softener", "Antidiarrheal"],
+        "a": "Hyperosmotic laxative"
+    },
+    {
+        "q": "Which drug is a fiber laxative?",
+        "choices": ["Psyllium", "Senna", "Bisacodyl", "Docusate"],
+        "a": "Psyllium"
+    },
+    {
+        "q": "Which drug is used for hepatic encephalopathy prevention?",
+        "choices": ["Rifaximin", "Loperamide", "Lubiprostone", "Dicyclomine"],
+        "a": "Rifaximin"
+    },
+    {
+        "q": "Which drug is a stimulant laxative taken at bedtime?",
+        "choices": ["Senna", "Docusate", "Polyethylene glycol", "Psyllium"],
+        "a": "Senna"
+    },
+    {
+        "q": "Which drug is contraindicated in children recovering from flu or varicella?",
+        "choices": ["Bismuth subsalicylate", "Famotidine", "Omeprazole", "Magnesium hydroxide"],
+        "a": "Bismuth subsalicylate"
+    },
+    {
+        "q": "What class is famotidine?",
+        "choices": ["Histamine H2 antagonist", "Proton pump inhibitor", "Antacid", "Dopamine antagonist"],
+        "a": "Histamine H2 antagonist"
+    },
+    {
+        "q": "Which drug is a probiotic?",
+        "choices": ["Lactobacillus", "Famotidine", "Omeprazole", "Sucralfate"],
+        "a": "Lactobacillus"
+    },
+    {
+        "q": "What is the brand name of magnesium hydroxide?",
+        "choices": ["Milk of Magnesia", "Pepcid", "Prilosec", "Carafate"],
+        "a": "Milk of Magnesia"
+    },
+    {
+        "q": "Which drug has a boxed warning for tardive dyskinesia?",
+        "choices": ["Metoclopramide", "Omeprazole", "Famotidine", "Sucralfate"],
+        "a": "Metoclopramide"
+    },
+    {
+        "q": "Which drug is a proton pump inhibitor?",
+        "choices": ["Omeprazole", "Famotidine", "Sucralfate", "Metoclopramide"],
+        "a": "Omeprazole"
+    },
+    {
+        "q": "Which proton pump inhibitor has Protonix as a brand name?",
+        "choices": ["Pantoprazole", "Omeprazole", "Famotidine", "Sucralfate"],
+        "a": "Pantoprazole"
+    },
+    {
+        "q": "Which drug is used for duodenal ulcer and should be taken on an empty stomach?",
+        "choices": ["Sucralfate", "Famotidine", "Omeprazole", "Magnesium hydroxide"],
+        "a": "Sucralfate"
+    },
+    {
+        "q": "Which topical drug is used for hemorrhoidal pain, burning, or itching?",
+        "choices": ["Phenylephrine topical", "Promethazine", "Pantoprazole", "Famotidine"],
+        "a": "Phenylephrine topical"
+    },
+    {
+        "q": "Which drug is a phenothiazine antihistamine used for nausea and vomiting?",
+        "choices": ["Promethazine", "Diphenhydramine", "Hydroxyzine", "Cetirizine"],
+        "a": "Promethazine"
+    },
+    {
+        "q": "What is the brand name of azelastine?",
+        "choices": ["Astepro", "Zyrtec", "Afrin", "NasalCrom"],
+        "a": "Astepro"
+    },
+    {
+        "q": "Which drug is a mast cell stabilizer?",
+        "choices": ["Cromolyn sodium", "Mometasone", "Oxymetazoline", "Azelastine"],
+        "a": "Cromolyn sodium"
+    },
+    {
+        "q": "Which drug is a cough suppressant that can cause euphoria or hallucinations when abused?",
+        "choices": ["Dextromethorphan", "Guaifenesin", "Diphenhydramine", "Benzonatate"],
+        "a": "Dextromethorphan"
+    },
+    {
+        "q": "What is the brand name of diphenhydramine?",
+        "choices": ["Benadryl", "Zyrtec", "Vistaril", "Mucinex"],
+        "a": "Benadryl"
+    },
+    {
+        "q": "Which drug is an expectorant?",
+        "choices": ["Guaifenesin", "Dextromethorphan", "Diphenhydramine", "Hydroxyzine"],
+        "a": "Guaifenesin"
+    },
+    {
+        "q": "Which drug is a piperazine derivative antihistamine?",
+        "choices": ["Hydroxyzine", "Diphenhydramine", "Cetirizine", "Azelastine"],
+        "a": "Hydroxyzine"
+    },
+    {
+        "q": "What is the brand name of ketotifen ophthalmic?",
+        "choices": ["Zaditor", "Afrin", "Astepro", "Benadryl"],
+        "a": "Zaditor"
+    },
+    {
+        "q": "Which drug is an intranasal corticosteroid?",
+        "choices": ["Mometasone", "Azelastine", "Cromolyn sodium", "Oxymetazoline"],
+        "a": "Mometasone"
+    },
+    {
+        "q": "Which nasal spray should not be used for more than 3 consecutive days?",
+        "choices": ["Oxymetazoline", "Mometasone", "Cromolyn sodium", "Azelastine"],
+        "a": "Oxymetazoline"
+    },
+    {
+        "q": "Which drug should not be chewed because it can cause oral and pharyngeal numbness?",
+        "choices": ["Benzonatate", "Dextromethorphan", "Guaifenesin", "Diphenhydramine"],
+        "a": "Benzonatate"
+    },
+    {
+        "q": "Which drug is used for emergency treatment of acute anaphylaxis?",
+        "choices": ["Epinephrine auto-injector", "Diphenhydramine", "Hydroxyzine", "Cetirizine"],
+        "a": "Epinephrine auto-injector"
+    },
+    {
+        "q": "Which drug is contraindicated with concurrent or recent MAOI use and is used for nasal congestion?",
+        "choices": ["Pseudoephedrine", "Oxymetazoline", "Azelastine", "Mometasone"],
+        "a": "Pseudoephedrine"
+    },
+    {
+        "q": "Which ophthalmic decongestant is contraindicated in narrow-angle glaucoma?",
+        "choices": ["Naphazoline", "Ketotifen", "Azelastine", "Mometasone"],
+        "a": "Naphazoline"
+    },
+    {
+        "q": "Which drug is a sedative alpha-2 agonist used in ICU or procedural sedation?",
+        "choices": ["Dexmedetomidine", "Guanfacine", "Atomoxetine", "Hydroxyzine"],
+        "a": "Dexmedetomidine"
+    },
+    {
+        "q": "What is the brand name of levothyroxine?",
+        "choices": ["Synthroid", "Strattera", "Vyvanse", "Intuniv"],
+        "a": "Synthroid"
+    },
+    {
+        "q": "Which drug has a boxed warning that it is not for weight reduction?",
+        "choices": ["Levothyroxine", "Lisdexamfetamine", "Atomoxetine", "Methylphenidate"],
+        "a": "Levothyroxine"
+    },
+    {
+        "q": "What is the brand name of atomoxetine?",
+        "choices": ["Strattera", "Vyvanse", "Concerta", "Intuniv"],
+        "a": "Strattera"
+    },
+    {
+        "q": "Which drug has a boxed warning for suicidality in children and adolescents?",
+        "choices": ["Atomoxetine", "Guanfacine", "Lisdexamfetamine", "Methylphenidate"],
+        "a": "Atomoxetine"
+    },
+    {
+        "q": "Which drug is an alpha-2 agonist with Intuniv as a brand name?",
+        "choices": ["Guanfacine", "Atomoxetine", "Lisdexamfetamine", "Methylphenidate"],
+        "a": "Guanfacine"
+    },
+    {
+        "q": "What is the brand name of lisdexamfetamine?",
+        "choices": ["Vyvanse", "Concerta", "Strattera", "Intuniv"],
+        "a": "Vyvanse"
+    },
+    {
+        "q": "Which stimulant has a boxed warning for risk of abuse, misuse, and diversion?",
+        "choices": ["Lisdexamfetamine", "Atomoxetine", "Guanfacine", "Hydroxyzine"],
+        "a": "Lisdexamfetamine"
+    },
+    {
+        "q": "Which drug has Concerta and Ritalin as brand names?",
+        "choices": ["Methylphenidate", "Lisdexamfetamine", "Atomoxetine", "Guanfacine"],
+        "a": "Methylphenidate"
+    },
+    {
+        "q": "Which stimulant is also used for narcolepsy?",
+        "choices": ["Methylphenidate", "Atomoxetine", "Guanfacine", "Hydroxyzine"],
+        "a": "Methylphenidate"
+    },
+    {
+        "q": "Which antihistamine is contraindicated in patients with hypersensitivity to hydroxyzine?",
+        "choices": ["Cetirizine", "Diphenhydramine", "Hydroxyzine", "Azelastine"],
+        "a": "Cetirizine"
+    },
+    {
+        "q": "What is the brand name of cetirizine?",
+        "choices": ["Zyrtec", "Astepro", "Benadryl", "Vistaril"],
+        "a": "Zyrtec"
+    },
+    {
+        "q": "Which drug should be taken 1 hour before meals and may restart after 4 months for OTC use?",
+        "choices": ["Omeprazole", "Famotidine", "Sucralfate", "Pantoprazole"],
+        "a": "Omeprazole"
+    },
+    {
+        "q": "Which drug may cause dyspnea or chest tightness with the first dose?",
+        "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Loperamide"],
+        "a": "Lubiprostone"
+    },
+    {
+        "q": "Which drug should be avoided with mineral oil unless approved by a health care provider?",
+        "choices": ["Docusate", "Senna", "Psyllium", "Rifaximin"],
+        "a": "Docusate"
+    },
+    {
+        "q": "Which drug should be separated 2 hours from other medications and dust inhalation should be avoided?",
+        "choices": ["Psyllium", "Bisacodyl", "Docusate", "Loperamide"],
+        "a": "Psyllium"
+    }
+]
+
+# ---------- Helpers ----------
+def build_game_questions(num_questions=10):
+    pool = [dict(q) for q in MASTER_QUESTIONS]
+    random.shuffle(pool)
+    selected = pool[:num_questions]
+
+    for q in selected:
+        random.shuffle(q["choices"])
+
+    return selected
+
+def reset_room_state(room_ref, room_data):
+    room_ref.update({
+        "score1": 0,
+        "score2": 0,
+        "current_question": 0,
+        "buzzer": "",
+        "steal_turn": "",
+        "turn_deadline": 0,
+        "questions": build_game_questions()
+    })
+
+def other_player(role):
+    return "player2" if role == "player1" else "player1"
+
+def player_label(role):
+    return "Player 1" if role == "player1" else "Player 2"
+
+def get_player_name(room_data, role):
+    return room_data.get(role, "")
+
+# ---------- Inputs ----------
+name = st.text_input("Your name")
+room = st.text_input("Room code", value="ROOM123").strip().upper()
+
+# ---------- Join Room ----------
+if st.button("Join Room"):
+    if not name.strip():
+        st.error("Enter your name first.")
+    else:
+        room_ref = rooms_ref.child(room)
+        room_data = room_ref.get()
+
+        if room_data is None:
+            room_ref.set({
+                "player1": name,
+                "player2": "",
+                "score1": 0,
+                "score2": 0,
+                "current_question": 0,
+                "buzzer": "",
+                "steal_turn": "",
+                "turn_deadline": 0,
+                "questions": build_game_questions()
+            })
+            st.success(f"{name} joined {room} as Player 1")
+            st.rerun()
+
+        else:
+            player1 = room_data.get("player1", "")
+            player2 = room_data.get("player2", "")
+
+            if player1 == name or player2 == name:
+                st.success(f"{name} rejoined {room}")
+
+            elif not player1:
+                room_ref.update({"player1": name})
+                st.success(f"{name} joined {room} as Player 1")
+                st.rerun()
+
+            elif not player2:
+                room_ref.update({"player2": name})
+                st.success(f"{name} joined {room} as Player 2")
+                st.rerun()
+
+            else:
+                st.error("Room is full.")
+
+# ---------- Load Room ----------
+room_data = rooms_ref.child(room).get()
+
+player_role = None
+if room_data:
+    if name == room_data.get("player1"):
+        player_role = "player1"
+    elif name == room_data.get("player2"):
+        player_role = "player2"
+
+# ---------- Main Game ----------
+if room_data:
+    room_ref = rooms_ref.child(room)
+
+    # Handle timer expiration
+    now = time.time()
+    buzzer = room_data.get("buzzer", "")
+    steal_turn = room_data.get("steal_turn", "")
+    deadline = room_data.get("turn_deadline", 0)
+
+    if deadline and now > deadline:
+        if steal_turn:
+            # steal timer expired -> move next question
+            room_ref.update({
+                "current_question": room_data.get("current_question", 0) + 1,
+                "buzzer": "",
+                "steal_turn": "",
+                "turn_deadline": 0
+            })
+            st.rerun()
+        elif buzzer:
+            # buzzer winner timed out -> other player gets steal chance
+            room_ref.update({
+                "steal_turn": other_player(buzzer),
+                "turn_deadline": time.time() + 5
+            })
+            st.rerun()
+
+    # Reload after any timer-triggered update
+    room_data = room_ref.get()
+    buzzer = room_data.get("buzzer", "")
+    steal_turn = room_data.get("steal_turn", "")
+    deadline = room_data.get("turn_deadline", 0)
+
+    st.subheader(f"Room: {room}")
+    st.write("Player 1:", room_data.get("player1", ""))
+    st.write("Player 2:", room_data.get("player2", ""))
+    st.write("Score 1:", room_data.get("score1", 0))
+    st.write("Score 2:", room_data.get("score2", 0))
+
+    questions = room_data.get("questions", [])
+    q_index = room_data.get("current_question", 0)
+
+    if q_index < len(questions):
+        current_question = questions[q_index]
+        st.write("### Question")
+        st.write(current_question["q"])
+    else:
+        current_question = None
+        st.success("Game over")
+
+        p1 = room_data.get("score1", 0)
+        p2 = room_data.get("score2", 0)
+        if p1 > p2:
+            st.success(f"🏆 {room_data.get('player1', 'Player 1')} wins!")
+        elif p2 > p1:
+            st.success(f"🏆 {room_data.get('player2', 'Player 2')} wins!")
+        else:
+            st.info("🤝 It's a tie!")
+
+    st.write("Buzzer:", buzzer if buzzer else "None")
+    if steal_turn:
+        st.write("Steal Turn:", player_label(steal_turn))
+
+    # Timer display
+    if deadline and current_question and (buzzer or steal_turn):
+        seconds_left = max(0, int(deadline - time.time()) + (1 if deadline - time.time() > 0 else 0))
+        st.write(f"⏱️ Time left: {seconds_left}s")
+
+    if current_question:
+        # No one buzzed yet
+        if buzzer == "" and steal_turn == "":
+            if st.button("🔴 Buzz"):
+                if player_role:
+                    room_ref.update({
+                        "buzzer": player_role,
+                        "turn_deadline": time.time() + 5
+                    })
+                    st.rerun()
+
+        # Steal turn active
+        elif steal_turn:
+            if player_role == steal_turn:
+                st.warning("Steal chance! Pick an answer in 5 seconds.")
+
+                for i, choice in enumerate(current_question["choices"]):
+                    if st.button(choice, key=f"steal_{q_index}_{i}"):
+                        if choice.lower() == current_question["a"].lower():
+                            if player_role == "player1":
+                                room_ref.update({
+                                    "score1": room_data.get("score1", 0) + 1,
+                                    "current_question": q_index + 1,
+                                    "buzzer": "",
+                                    "steal_turn": "",
+                                    "turn_deadline": 0
+                                })
+                            else:
+                                room_ref.update({
+                                    "score2": room_data.get("score2", 0) + 1,
+                                    "current_question": q_index + 1,
+                                    "buzzer": "",
+                                    "steal_turn": "",
+                                    "turn_deadline": 0
+                                })
+                        else:
+                            room_ref.update({
+                                "current_question": q_index + 1,
+                                "buzzer": "",
+                                "steal_turn": "",
+                                "turn_deadline": 0
+                            })
+                        st.rerun()
+            else:
+                st.warning("Other player is attempting the steal.")
+
+        # Normal answer turn
+        else:
+            if player_role == buzzer:
+                st.success("You buzzed first! Pick an answer in 5 seconds.")
+
+                for i, choice in enumerate(current_question["choices"]):
+                    if st.button(choice, key=f"buzz_{q_index}_{i}"):
+                        if choice.lower() == current_question["a"].lower():
+                            if player_role == "player1":
+                                room_ref.update({
+                                    "score1": room_data.get("score1", 0) + 1,
+                                    "current_question": q_index + 1,
+                                    "buzzer": "",
+                                    "steal_turn": "",
+                                    "turn_deadline": 0
+                                })
+                            else:
+                                room_ref.update({
+                                    "score2": room_data.get("score2", 0) + 1,
+                                    "current_question": q_index + 1,
+                                    "buzzer": "",
+                                    "steal_turn": "",
+                                    "turn_deadline": 0
+                                })
+                        else:
+                            room_ref.update({
+                                "steal_turn": other_player(player_role),
+                                "turn_deadline": time.time() + 5
+                            })
+                        st.rerun()
+            else:
+                st.warning("Other player buzzed first.")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Reset Buzzer"):
+            room_ref.update({
+                "buzzer": "",
+                "steal_turn": "",
+                "turn_deadline": 0
+            })
+            st.rerun()
+
+    with col2:
+        if st.button("New Game"):
+            reset_room_state(room_ref, room_data)
+            st.rerun()
+
+else:
+    st.info("No room data yet.")
