@@ -158,6 +158,54 @@ def get_leaderboard():
     rows.sort(key=lambda x: x["wins"], reverse=True)
     return rows
 
+def render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=False):
+    cols = st.columns(2)
+
+    for i, choice in enumerate(current_question["choices"]):
+        col = cols[i % 2]
+
+        with col:
+            button_key = f"{'steal' if is_steal else 'buzz'}_{q_index}_{i}"
+            if st.button(choice, key=button_key, use_container_width=True):
+                if choice.lower() == current_question["a"].lower():
+                    if player_role == "player1":
+                        room_ref.update({
+                            "score1": room_data.get("score1", 0) + 1,
+                            "current_question": q_index + 1,
+                            "buzzer": "",
+                            "steal_turn": "",
+                            "turn_deadline": 0,
+                            "feedback": f"{name} got it correct! ✅",
+                            "rope_position": room_data.get("rope_position", 0) - 1
+                        })
+                    else:
+                        room_ref.update({
+                            "score2": room_data.get("score2", 0) + 1,
+                            "current_question": q_index + 1,
+                            "buzzer": "",
+                            "steal_turn": "",
+                            "turn_deadline": 0,
+                            "feedback": f"{name} got it correct! ✅",
+                            "rope_position": room_data.get("rope_position", 0) + 1
+                        })
+                else:
+                    if is_steal:
+                        room_ref.update({
+                            "current_question": q_index + 1,
+                            "buzzer": "",
+                            "steal_turn": "",
+                            "turn_deadline": 0,
+                            "feedback": random.choice(WRONG_MESSAGES)
+                        })
+                    else:
+                        room_ref.update({
+                            "steal_turn": other_player(player_role),
+                            "turn_deadline": time.time() + 5,
+                            "feedback": random.choice(WRONG_MESSAGES)
+                        })
+
+                st.rerun()
+
 # ---------- Pretty Leaderboard ----------
 st.subheader("🏆 Leaderboard")
 leaderboard = get_leaderboard()
@@ -421,74 +469,14 @@ if room_data:
         elif steal_turn:
             if player_role == steal_turn:
                 st.warning("Steal chance! Pick an answer in 5 seconds.")
-                for i, choice in enumerate(current_question["choices"]):
-                    if st.button(choice, key=f"steal_{q_index}_{i}"):
-                        if choice.lower() == current_question["a"].lower():
-                            if player_role == "player1":
-                                room_ref.update({
-                                    "score1": room_data.get("score1", 0) + 1,
-                                    "current_question": q_index + 1,
-                                    "buzzer": "",
-                                    "steal_turn": "",
-                                    "turn_deadline": 0,
-                                    "feedback": f"{name} got it correct! ✅",
-                                    "rope_position": room_data.get("rope_position", 0) - 1
-                                })
-                            else:
-                                room_ref.update({
-                                    "score2": room_data.get("score2", 0) + 1,
-                                    "current_question": q_index + 1,
-                                    "buzzer": "",
-                                    "steal_turn": "",
-                                    "turn_deadline": 0,
-                                    "feedback": f"{name} got it correct! ✅",
-                                    "rope_position": room_data.get("rope_position", 0) + 1
-                                })
-                        else:
-                            room_ref.update({
-                                "current_question": q_index + 1,
-                                "buzzer": "",
-                                "steal_turn": "",
-                                "turn_deadline": 0,
-                                "feedback": random.choice(WRONG_MESSAGES)
-                            })
-                        st.rerun()
+                render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=True)
             else:
                 st.warning("Other player is attempting the steal.")
 
         else:
             if player_role == buzzer:
                 st.success("You buzzed first! Pick an answer in 5 seconds.")
-                for i, choice in enumerate(current_question["choices"]):
-                    if st.button(choice, key=f"buzz_{q_index}_{i}"):
-                        if choice.lower() == current_question["a"].lower():
-                            if player_role == "player1":
-                                room_ref.update({
-                                    "score1": room_data.get("score1", 0) + 1,
-                                    "current_question": q_index + 1,
-                                    "buzzer": "",
-                                    "steal_turn": "",
-                                    "turn_deadline": 0,
-                                    "feedback": f"{name} got it correct! ✅",
-                                    "rope_position": room_data.get("rope_position", 0) - 1
-                                })
-                            else:
-                                room_ref.update({
-                                    "score2": room_data.get("score2", 0) + 1,
-                                    "current_question": q_index + 1,
-                                    "buzzer": "",
-                                    "steal_turn": "",
-                                    "turn_deadline": 0,
-                                    "feedback": f"{name} got it correct! ✅",
-                                    "rope_position": room_data.get("rope_position", 0) + 1
-                                })
-                        else:
-                            room_ref.update({
-                                "steal_turn": other_player(player_role),
-                                "turn_deadline": time.time() + 5,
-                                "feedback": random.choice(WRONG_MESSAGES)
-                            })
-                        st.rerun()
+                render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=False)
             else:
                 st.warning("Other player buzzed first.")
 
