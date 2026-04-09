@@ -27,7 +27,6 @@ leaderboard_ref = db.reference("leaderboard")
 # ---------- App ----------
 st.set_page_config(page_title="War on Drugs", page_icon="💊")
 st.title("War on Drugs")
-
 st_autorefresh(interval=1000, key="battle_refresh")
 
 # ---------- Room Code Generator ----------
@@ -44,6 +43,23 @@ WRONG_MESSAGES = [
     "Are you DA right now 😭"
 ]
 
+# ---------- Week Labels ----------
+WEEK_OPTIONS = {
+    "All Weeks — Mixed Review": "All Weeks",
+    "Week 1 — GI: Laxatives / Antidiarrheals": "Week 1",
+    "Week 2 — GI: GERD / Antacids": "Week 2",
+    "Week 3 — Cough / Cold / Allergy": "Week 3",
+    "Week 4 — ADHD / Cognitive / Misc.": "Week 4",
+}
+
+WEEK_DISPLAY = {
+    "All Weeks": "All Weeks — Mixed Review",
+    "Week 1": "Week 1 — GI: Laxatives / Antidiarrheals",
+    "Week 2": "Week 2 — GI: GERD / Antacids",
+    "Week 3": "Week 3 — Cough / Cold / Allergy",
+    "Week 4": "Week 4 — ADHD / Cognitive / Misc.",
+}
+
 # ---------- Question Banks ----------
 WEEK_1_QUESTIONS = [
     {"q": "What is the mechanism of action of bisacodyl?", "choices": ["Stimulant laxative", "Stool softener", "Fiber laxative", "Hyperosmotic laxative"], "a": "Stimulant laxative"},
@@ -52,10 +68,28 @@ WEEK_1_QUESTIONS = [
     {"q": "Which drug is a guanylate cyclase agonist?", "choices": ["Linaclotide", "Lubiprostone", "Psyllium", "Polyethylene glycol"], "a": "Linaclotide"},
     {"q": "Which drug treats diarrhea but does not treat the underlying cause?", "choices": ["Loperamide", "Rifaximin", "Docusate", "Bisacodyl"], "a": "Loperamide"},
     {"q": "Which drug is a chloride channel activator?", "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Senna"], "a": "Lubiprostone"},
-    {"q": "What is the mechanism of polyethylene glycol?", "choices": ["Hyperosmotic laxative", "Stimulant laxative", "Stool softener", "Antidiarrheal"], "a": "Hyperosmotic laxative"},
+    {"q": "What is the mechanism of action of polyethylene glycol?", "choices": ["Hyperosmotic laxative", "Stimulant laxative", "Stool softener", "Antidiarrheal"], "a": "Hyperosmotic laxative"},
     {"q": "Which drug is a fiber laxative?", "choices": ["Psyllium", "Senna", "Bisacodyl", "Docusate"], "a": "Psyllium"},
     {"q": "Which drug is used for hepatic encephalopathy prevention?", "choices": ["Rifaximin", "Loperamide", "Lubiprostone", "Dicyclomine"], "a": "Rifaximin"},
     {"q": "Which drug is a stimulant laxative taken at bedtime?", "choices": ["Senna", "Docusate", "Polyethylene glycol", "Psyllium"], "a": "Senna"},
+    {"q": "Which drug has Dulcolax as a brand name?", "choices": ["Bisacodyl", "Docusate", "Senna", "Psyllium"], "a": "Bisacodyl"},
+    {"q": "Which drug is contraindicated in intestinal obstruction and should not be given within 1 hour of dairy or antacids?", "choices": ["Bisacodyl", "Loperamide", "Rifaximin", "Dicyclomine"], "a": "Bisacodyl"},
+    {"q": "Which drug is a stool softener?", "choices": ["Docusate", "Bisacodyl", "Senna", "Psyllium"], "a": "Docusate"},
+    {"q": "Which drug softens stool but does not directly cause defecation?", "choices": ["Docusate", "Senna", "PEG", "Linaclotide"], "a": "Docusate"},
+    {"q": "Which drug has Linzess as a brand name?", "choices": ["Linaclotide", "Lubiprostone", "Loperamide", "Rifaximin"], "a": "Linaclotide"},
+    {"q": "Which drug is contraindicated in age under 2 years and GI obstruction?", "choices": ["Linaclotide", "Rifaximin", "Docusate", "Psyllium"], "a": "Linaclotide"},
+    {"q": "Which drug has Imodium AD as a brand name?", "choices": ["Loperamide", "Rifaximin", "Lubiprostone", "Senna"], "a": "Loperamide"},
+    {"q": "Which drug has a boxed warning for TdP, cardiac arrest, and death when maximum dose is exceeded?", "choices": ["Loperamide", "Bisacodyl", "Dicyclomine", "Psyllium"], "a": "Loperamide"},
+    {"q": "Which drug has Amitiza as a brand name?", "choices": ["Lubiprostone", "Linaclotide", "PEG", "Rifaximin"], "a": "Lubiprostone"},
+    {"q": "Which drug should be taken with food and water and may cause dyspnea with the first dose?", "choices": ["Lubiprostone", "Loperamide", "Psyllium", "Senna"], "a": "Lubiprostone"},
+    {"q": "Which drug has MiraLAX as a brand name?", "choices": ["Polyethylene glycol", "Psyllium", "Docusate", "Senna"], "a": "Polyethylene glycol"},
+    {"q": "Which drug should be mixed in liquid and often works within 12 to 24 hours?", "choices": ["Polyethylene glycol", "Bisacodyl", "Loperamide", "Dicyclomine"], "a": "Polyethylene glycol"},
+    {"q": "Which drug has Metamucil as a brand name?", "choices": ["Psyllium", "Senna", "Docusate", "PEG"], "a": "Psyllium"},
+    {"q": "Which drug should be started slowly and titrated up over 1 to 2 weeks?", "choices": ["Psyllium", "Bisacodyl", "Linaclotide", "Rifaximin"], "a": "Psyllium"},
+    {"q": "Which drug has Xifaxan as a brand name?", "choices": ["Rifaximin", "Loperamide", "Lubiprostone", "Dicyclomine"], "a": "Rifaximin"},
+    {"q": "Which drug is used for travelers diarrhea at 200 mg three times daily for 3 days?", "choices": ["Rifaximin", "Loperamide", "Bisacodyl", "Senna"], "a": "Rifaximin"},
+    {"q": "Which drug has Senokot as a brand name?", "choices": ["Senna", "Docusate", "PEG", "Psyllium"], "a": "Senna"},
+    {"q": "Which drug may cause urine discoloration and should be spaced from other medications?", "choices": ["Senna", "Bisacodyl", "Linaclotide", "Loperamide"], "a": "Senna"},
 ]
 
 WEEK_2_QUESTIONS = [
@@ -69,6 +103,22 @@ WEEK_2_QUESTIONS = [
     {"q": "Which drug is used for duodenal ulcer and should be taken on an empty stomach?", "choices": ["Sucralfate", "Famotidine", "Omeprazole", "Magnesium hydroxide"], "a": "Sucralfate"},
     {"q": "Which topical drug is used for hemorrhoidal pain, burning, or itching?", "choices": ["Phenylephrine topical", "Promethazine", "Pantoprazole", "Famotidine"], "a": "Phenylephrine topical"},
     {"q": "Which drug is a phenothiazine antihistamine used for nausea and vomiting?", "choices": ["Promethazine", "Diphenhydramine", "Hydroxyzine", "Cetirizine"], "a": "Promethazine"},
+    {"q": "Which drug has Pepcid as a brand name?", "choices": ["Famotidine", "Omeprazole", "Pantoprazole", "Sucralfate"], "a": "Famotidine"},
+    {"q": "Which drug should be taken 15 to 60 minutes before meals for heartburn prevention?", "choices": ["Famotidine", "Sucralfate", "Pantoprazole", "Magnesium hydroxide"], "a": "Famotidine"},
+    {"q": "Which drug has a lack of strong efficacy data as a clinical pearl?", "choices": ["Lactobacillus", "Famotidine", "Omeprazole", "Promethazine"], "a": "Lactobacillus"},
+    {"q": "Which drug should sometimes be kept in the fridge and may lose potency over time?", "choices": ["Lactobacillus", "Sucralfate", "Famotidine", "Pantoprazole"], "a": "Lactobacillus"},
+    {"q": "Which drug can be used as both an antacid and a laxative?", "choices": ["Magnesium hydroxide", "Famotidine", "Omeprazole", "Promethazine"], "a": "Magnesium hydroxide"},
+    {"q": "Which drug should be used cautiously in renal failure, heart failure, and advanced age?", "choices": ["Magnesium hydroxide", "Famotidine", "Pantoprazole", "Sucralfate"], "a": "Magnesium hydroxide"},
+    {"q": "Which drug has Reglan as a brand name?", "choices": ["Metoclopramide", "Sucralfate", "Promethazine", "Famotidine"], "a": "Metoclopramide"},
+    {"q": "Which drug is a dopamine antagonist used for diabetic gastroparesis?", "choices": ["Metoclopramide", "Pantoprazole", "Famotidine", "Lactobacillus"], "a": "Metoclopramide"},
+    {"q": "Which drug has Prilosec as a brand name?", "choices": ["Omeprazole", "Pantoprazole", "Famotidine", "Sucralfate"], "a": "Omeprazole"},
+    {"q": "Which drug has a contraindication with concurrent rilpivirine and is used OTC for 14 days?", "choices": ["Omeprazole", "Famotidine", "Promethazine", "Magnesium hydroxide"], "a": "Omeprazole"},
+    {"q": "Which drug has Protonix as a brand name?", "choices": ["Pantoprazole", "Omeprazole", "Famotidine", "Sucralfate"], "a": "Pantoprazole"},
+    {"q": "Which drug may cause headache and should ideally be taken before meals?", "choices": ["Pantoprazole", "Promethazine", "Famotidine", "Lactobacillus"], "a": "Pantoprazole"},
+    {"q": "Which drug has Phenergan as a brand name?", "choices": ["Promethazine", "Famotidine", "Pantoprazole", "Sucralfate"], "a": "Promethazine"},
+    {"q": "Which drug is contraindicated in children younger than 2 years and in comatose states?", "choices": ["Promethazine", "Famotidine", "Sucralfate", "Lactobacillus"], "a": "Promethazine"},
+    {"q": "Which drug has Carafate as a brand name?", "choices": ["Sucralfate", "Famotidine", "Omeprazole", "Pantoprazole"], "a": "Sucralfate"},
+    {"q": "Which drug should be separated 2 to 4 hours from other medications and shaken well if suspension?", "choices": ["Sucralfate", "Famotidine", "Magnesium hydroxide", "Promethazine"], "a": "Sucralfate"},
 ]
 
 WEEK_3_QUESTIONS = [
@@ -82,6 +132,21 @@ WEEK_3_QUESTIONS = [
     {"q": "Which drug is an intranasal corticosteroid?", "choices": ["Mometasone", "Azelastine", "Cromolyn sodium", "Oxymetazoline"], "a": "Mometasone"},
     {"q": "Which nasal spray should not be used for more than 3 consecutive days?", "choices": ["Oxymetazoline", "Mometasone", "Cromolyn sodium", "Azelastine"], "a": "Oxymetazoline"},
     {"q": "Which drug should not be chewed because it can cause oral and pharyngeal numbness?", "choices": ["Benzonatate", "Dextromethorphan", "Guaifenesin", "Diphenhydramine"], "a": "Benzonatate"},
+    {"q": "Which drug is a nasal antihistamine?", "choices": ["Azelastine", "Mometasone", "Oxymetazoline", "Cromolyn sodium"], "a": "Azelastine"},
+    {"q": "Which drug should be primed on first use and avoided in the eyes?", "choices": ["Azelastine", "Cetirizine", "Diphenhydramine", "Guaifenesin"], "a": "Azelastine"},
+    {"q": "What is the brand name of cetirizine?", "choices": ["Zyrtec", "Benadryl", "Astepro", "Vistaril"], "a": "Zyrtec"},
+    {"q": "Which drug may cause excitability or insomnia in children and has onset within 60 minutes?", "choices": ["Cetirizine", "Diphenhydramine", "Hydroxyzine", "Azelastine"], "a": "Cetirizine"},
+    {"q": "What is the brand name of cromolyn sodium nasal?", "choices": ["NasalCrom", "Afrin", "Astepro", "Zaditor"], "a": "NasalCrom"},
+    {"q": "Which drug is not appropriate for acute symptom relief and should not be used for cold symptoms?", "choices": ["Cromolyn sodium", "Oxymetazoline", "Mometasone", "Azelastine"], "a": "Cromolyn sodium"},
+    {"q": "Which drug has Delsym as a brand name?", "choices": ["Dextromethorphan", "Guaifenesin", "Benzonatate", "Diphenhydramine"], "a": "Dextromethorphan"},
+    {"q": "Which drug is contraindicated with concurrent MAOI use and is a cough suppressant?", "choices": ["Dextromethorphan", "Guaifenesin", "Benzonatate", "Hydroxyzine"], "a": "Dextromethorphan"},
+    {"q": "Which drug is used only occasionally for sleep and should not be used in children for sleep?", "choices": ["Diphenhydramine", "Cetirizine", "Hydroxyzine", "Guaifenesin"], "a": "Diphenhydramine"},
+    {"q": "Which drug has Mucinex as a brand name?", "choices": ["Guaifenesin", "Dextromethorphan", "Diphenhydramine", "Benzonatate"], "a": "Guaifenesin"},
+    {"q": "Which drug has little evidence supporting its use for cough?", "choices": ["Guaifenesin", "Dextromethorphan", "Benzonatate", "Azelastine"], "a": "Guaifenesin"},
+    {"q": "What is the brand name of hydroxyzine?", "choices": ["Vistaril", "Zyrtec", "Benadryl", "Astepro"], "a": "Vistaril"},
+    {"q": "Which drug is contraindicated in patients with hypersensitivity to cetirizine?", "choices": ["Hydroxyzine", "Diphenhydramine", "Azelastine", "Guaifenesin"], "a": "Hydroxyzine"},
+    {"q": "Which ophthalmic drug is used for allergic conjunctivitis twice daily 8 to 12 hours apart?", "choices": ["Ketotifen", "Naphazoline", "Azelastine", "Mometasone"], "a": "Ketotifen"},
+    {"q": "Which drug requires priming if not used for 1 week and is used for allergic rhinitis?", "choices": ["Mometasone", "Oxymetazoline", "Azelastine", "Cromolyn sodium"], "a": "Mometasone"},
 ]
 
 WEEK_4_QUESTIONS = [
@@ -104,6 +169,22 @@ WEEK_4_QUESTIONS = [
     {"q": "Which drug may cause dyspnea or chest tightness with the first dose?", "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Loperamide"], "a": "Lubiprostone"},
     {"q": "Which drug should be avoided with mineral oil unless approved by a health care provider?", "choices": ["Docusate", "Senna", "Psyllium", "Rifaximin"], "a": "Docusate"},
     {"q": "Which drug should be separated 2 hours from other medications and dust inhalation should be avoided?", "choices": ["Psyllium", "Bisacodyl", "Docusate", "Loperamide"], "a": "Psyllium"},
+    {"q": "Which epinephrine product should be injected into the anterolateral thigh?", "choices": ["Epinephrine auto-injector", "Pseudoephedrine", "Diphenhydramine", "Hydroxyzine"], "a": "Epinephrine auto-injector"},
+    {"q": "What is the brand name of pseudoephedrine?", "choices": ["Sudafed", "Afrin", "Astepro", "Zyrtec"], "a": "Sudafed"},
+    {"q": "Which drug is an alpha/beta agonist used for nasal congestion at 60 mg every 4 to 6 hours?", "choices": ["Pseudoephedrine", "Epinephrine auto-injector", "Naphazoline", "Dexmedetomidine"], "a": "Pseudoephedrine"},
+    {"q": "What is the brand name of naphazoline ophthalmic?", "choices": ["Clear Eyes", "Zaditor", "Astepro", "Afrin"], "a": "Clear Eyes"},
+    {"q": "Which drug may produce prolonged redness with overuse and is fatal if ingested?", "choices": ["Naphazoline", "Ketotifen", "Azelastine", "Mometasone"], "a": "Naphazoline"},
+    {"q": "What is the brand name of dexmedetomidine?", "choices": ["Precedex", "Intuniv", "Strattera", "Vyvanse"], "a": "Precedex"},
+    {"q": "Which drug is an alpha-2 agonist used for short-term sedation?", "choices": ["Dexmedetomidine", "Guanfacine", "Atomoxetine", "Hydroxyzine"], "a": "Dexmedetomidine"},
+    {"q": "Which drug should be taken on an empty stomach with water at least 30 minutes before food?", "choices": ["Levothyroxine", "Atomoxetine", "Lisdexamfetamine", "Methylphenidate"], "a": "Levothyroxine"},
+    {"q": "Which drug should not be abruptly discontinued and may require 6 to 8 weeks for symptomatic improvement?", "choices": ["Levothyroxine", "Guanfacine", "Atomoxetine", "Methylphenidate"], "a": "Levothyroxine"},
+    {"q": "Which drug is a norepinephrine reuptake inhibitor used for ADHD?", "choices": ["Atomoxetine", "Guanfacine", "Lisdexamfetamine", "Methylphenidate"], "a": "Atomoxetine"},
+    {"q": "Which drug should not have its capsules opened?", "choices": ["Atomoxetine", "Lisdexamfetamine", "Methylphenidate", "Guanfacine"], "a": "Atomoxetine"},
+    {"q": "What is the brand name of guanfacine?", "choices": ["Intuniv", "Strattera", "Vyvanse", "Concerta"], "a": "Intuniv"},
+    {"q": "Which drug should not be abruptly discontinued because of rebound hypertension?", "choices": ["Guanfacine", "Atomoxetine", "Methylphenidate", "Hydroxyzine"], "a": "Guanfacine"},
+    {"q": "Which drug may be opened and dissolved in water, yogurt, or orange juice?", "choices": ["Lisdexamfetamine", "Atomoxetine", "Guanfacine", "Pseudoephedrine"], "a": "Lisdexamfetamine"},
+    {"q": "Which stimulant should be taken in the morning and is used for binge eating disorder?", "choices": ["Lisdexamfetamine", "Methylphenidate", "Atomoxetine", "Guanfacine"], "a": "Lisdexamfetamine"},
+    {"q": "Which drug should avoid late evening doses and can be opened into soft food?", "choices": ["Methylphenidate", "Atomoxetine", "Guanfacine", "Levothyroxine"], "a": "Methylphenidate"},
 ]
 
 QUESTION_BANK = {
@@ -271,7 +352,8 @@ if "room_code" not in st.session_state:
     st.session_state.room_code = generate_room_code()
 
 room = st.text_input("Room code", value=st.session_state.room_code).strip().upper()
-selected_week = st.selectbox("Choose a week", ["All Weeks", "Week 1", "Week 2", "Week 3", "Week 4"])
+selected_week_label = st.selectbox("Choose a week", list(WEEK_OPTIONS.keys()))
+selected_week = WEEK_OPTIONS[selected_week_label]
 st.caption("Share this room code with your opponent")
 
 # ---------- Join Room ----------
@@ -363,7 +445,7 @@ if room_data:
     deadline = room_data.get("turn_deadline", 0)
 
     st.subheader(f"Room: {room}")
-    st.write("Week:", room_data.get("selected_week", "All Weeks"))
+    st.write("Week:", WEEK_DISPLAY.get(room_data.get("selected_week", "All Weeks"), "All Weeks — Mixed Review"))
     st.write("Player 1:", room_data.get("player1", ""))
     st.write("Player 2:", room_data.get("player2", ""))
     st.write("Score 1:", room_data.get("score1", 0))
