@@ -44,8 +44,8 @@ WRONG_MESSAGES = [
     "Are you DA right now 😭"
 ]
 
-# ---------- Master question bank ----------
-MASTER_QUESTIONS = [
+# ---------- Question Banks ----------
+WEEK_1_QUESTIONS = [
     {"q": "What is the mechanism of action of bisacodyl?", "choices": ["Stimulant laxative", "Stool softener", "Fiber laxative", "Hyperosmotic laxative"], "a": "Stimulant laxative"},
     {"q": "Which drug is used for IBS and is an antimuscarinic?", "choices": ["Dicyclomine", "Loperamide", "Senna", "Rifaximin"], "a": "Dicyclomine"},
     {"q": "What is the brand name of docusate?", "choices": ["Colace", "Dulcolax", "Linzess", "Imodium AD"], "a": "Colace"},
@@ -56,6 +56,9 @@ MASTER_QUESTIONS = [
     {"q": "Which drug is a fiber laxative?", "choices": ["Psyllium", "Senna", "Bisacodyl", "Docusate"], "a": "Psyllium"},
     {"q": "Which drug is used for hepatic encephalopathy prevention?", "choices": ["Rifaximin", "Loperamide", "Lubiprostone", "Dicyclomine"], "a": "Rifaximin"},
     {"q": "Which drug is a stimulant laxative taken at bedtime?", "choices": ["Senna", "Docusate", "Polyethylene glycol", "Psyllium"], "a": "Senna"},
+]
+
+WEEK_2_QUESTIONS = [
     {"q": "Which drug is contraindicated in children recovering from flu or varicella?", "choices": ["Bismuth subsalicylate", "Famotidine", "Omeprazole", "Magnesium hydroxide"], "a": "Bismuth subsalicylate"},
     {"q": "What class is famotidine?", "choices": ["Histamine H2 antagonist", "Proton pump inhibitor", "Antacid", "Dopamine antagonist"], "a": "Histamine H2 antagonist"},
     {"q": "Which drug is a probiotic?", "choices": ["Lactobacillus", "Famotidine", "Omeprazole", "Sucralfate"], "a": "Lactobacillus"},
@@ -66,6 +69,9 @@ MASTER_QUESTIONS = [
     {"q": "Which drug is used for duodenal ulcer and should be taken on an empty stomach?", "choices": ["Sucralfate", "Famotidine", "Omeprazole", "Magnesium hydroxide"], "a": "Sucralfate"},
     {"q": "Which topical drug is used for hemorrhoidal pain, burning, or itching?", "choices": ["Phenylephrine topical", "Promethazine", "Pantoprazole", "Famotidine"], "a": "Phenylephrine topical"},
     {"q": "Which drug is a phenothiazine antihistamine used for nausea and vomiting?", "choices": ["Promethazine", "Diphenhydramine", "Hydroxyzine", "Cetirizine"], "a": "Promethazine"},
+]
+
+WEEK_3_QUESTIONS = [
     {"q": "What is the brand name of azelastine?", "choices": ["Astepro", "Zyrtec", "Afrin", "NasalCrom"], "a": "Astepro"},
     {"q": "Which drug is a mast cell stabilizer?", "choices": ["Cromolyn sodium", "Mometasone", "Oxymetazoline", "Azelastine"], "a": "Cromolyn sodium"},
     {"q": "Which drug is a cough suppressant that can cause euphoria or hallucinations when abused?", "choices": ["Dextromethorphan", "Guaifenesin", "Diphenhydramine", "Benzonatate"], "a": "Dextromethorphan"},
@@ -76,6 +82,9 @@ MASTER_QUESTIONS = [
     {"q": "Which drug is an intranasal corticosteroid?", "choices": ["Mometasone", "Azelastine", "Cromolyn sodium", "Oxymetazoline"], "a": "Mometasone"},
     {"q": "Which nasal spray should not be used for more than 3 consecutive days?", "choices": ["Oxymetazoline", "Mometasone", "Cromolyn sodium", "Azelastine"], "a": "Oxymetazoline"},
     {"q": "Which drug should not be chewed because it can cause oral and pharyngeal numbness?", "choices": ["Benzonatate", "Dextromethorphan", "Guaifenesin", "Diphenhydramine"], "a": "Benzonatate"},
+]
+
+WEEK_4_QUESTIONS = [
     {"q": "Which drug is used for emergency treatment of acute anaphylaxis?", "choices": ["Epinephrine auto-injector", "Diphenhydramine", "Hydroxyzine", "Cetirizine"], "a": "Epinephrine auto-injector"},
     {"q": "Which drug is contraindicated with concurrent or recent MAOI use and is used for nasal congestion?", "choices": ["Pseudoephedrine", "Oxymetazoline", "Azelastine", "Mometasone"], "a": "Pseudoephedrine"},
     {"q": "Which ophthalmic decongestant is contraindicated in narrow-angle glaucoma?", "choices": ["Naphazoline", "Ketotifen", "Azelastine", "Mometasone"], "a": "Naphazoline"},
@@ -94,21 +103,29 @@ MASTER_QUESTIONS = [
     {"q": "Which drug should be taken 1 hour before meals and may restart after 4 months for OTC use?", "choices": ["Omeprazole", "Famotidine", "Sucralfate", "Pantoprazole"], "a": "Omeprazole"},
     {"q": "Which drug may cause dyspnea or chest tightness with the first dose?", "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Loperamide"], "a": "Lubiprostone"},
     {"q": "Which drug should be avoided with mineral oil unless approved by a health care provider?", "choices": ["Docusate", "Senna", "Psyllium", "Rifaximin"], "a": "Docusate"},
-    {"q": "Which drug should be separated 2 hours from other medications and dust inhalation should be avoided?", "choices": ["Psyllium", "Bisacodyl", "Docusate", "Loperamide"], "a": "Psyllium"}
+    {"q": "Which drug should be separated 2 hours from other medications and dust inhalation should be avoided?", "choices": ["Psyllium", "Bisacodyl", "Docusate", "Loperamide"], "a": "Psyllium"},
 ]
 
+QUESTION_BANK = {
+    "All Weeks": WEEK_1_QUESTIONS + WEEK_2_QUESTIONS + WEEK_3_QUESTIONS + WEEK_4_QUESTIONS,
+    "Week 1": WEEK_1_QUESTIONS,
+    "Week 2": WEEK_2_QUESTIONS,
+    "Week 3": WEEK_3_QUESTIONS,
+    "Week 4": WEEK_4_QUESTIONS,
+}
+
 # ---------- Helpers ----------
-def build_game_questions(num_questions=10):
-    pool = [dict(q) for q in MASTER_QUESTIONS]
+def build_game_questions(selected_week="All Weeks", num_questions=10):
+    pool = [dict(q) for q in QUESTION_BANK[selected_week]]
     random.shuffle(pool)
-    selected = pool[:num_questions]
+    selected = pool[:min(num_questions, len(pool))]
 
     for q in selected:
         random.shuffle(q["choices"])
 
     return selected
 
-def reset_room_state(room_ref):
+def reset_room_state(room_ref, selected_week):
     room_ref.update({
         "score1": 0,
         "score2": 0,
@@ -119,7 +136,8 @@ def reset_room_state(room_ref):
         "winner_recorded": False,
         "feedback": "",
         "rope_position": 0,
-        "questions": build_game_questions()
+        "selected_week": selected_week,
+        "questions": build_game_questions(selected_week)
     })
 
 def other_player(role):
@@ -200,7 +218,7 @@ def render_choice_grid(current_question, q_index, player_role, room_ref, room_da
                     else:
                         room_ref.update({
                             "steal_turn": other_player(player_role),
-                            "turn_deadline": time.time() + 5,
+                            "turn_deadline": time.time() + 7,
                             "feedback": random.choice(WRONG_MESSAGES)
                         })
 
@@ -253,6 +271,7 @@ if "room_code" not in st.session_state:
     st.session_state.room_code = generate_room_code()
 
 room = st.text_input("Room code", value=st.session_state.room_code).strip().upper()
+selected_week = st.selectbox("Choose a week", ["All Weeks", "Week 1", "Week 2", "Week 3", "Week 4"])
 st.caption("Share this room code with your opponent")
 
 # ---------- Join Room ----------
@@ -278,7 +297,8 @@ if st.button("Join Room"):
                 "winner_recorded": False,
                 "feedback": "",
                 "rope_position": 0,
-                "questions": build_game_questions()
+                "selected_week": selected_week,
+                "questions": build_game_questions(selected_week)
             })
             st.success(f"{name} joined {room} as Player 1")
             st.rerun()
@@ -332,7 +352,7 @@ if room_data:
         elif buzzer:
             room_ref.update({
                 "steal_turn": other_player(buzzer),
-                "turn_deadline": time.time() + 5,
+                "turn_deadline": time.time() + 7,
                 "feedback": "⚡ Steal opportunity!"
             })
             st.rerun()
@@ -343,6 +363,7 @@ if room_data:
     deadline = room_data.get("turn_deadline", 0)
 
     st.subheader(f"Room: {room}")
+    st.write("Week:", room_data.get("selected_week", "All Weeks"))
     st.write("Player 1:", room_data.get("player1", ""))
     st.write("Player 2:", room_data.get("player2", ""))
     st.write("Score 1:", room_data.get("score1", 0))
@@ -450,10 +471,11 @@ if room_data:
         st.write("Steal Turn:", player_label(steal_turn))
 
     if deadline and current_question and (buzzer or steal_turn):
-        seconds_left = max(0, int(deadline - time.time()) + (1 if deadline - time.time() > 0 else 0))
-        st.write(f"⏱️ Time left: {seconds_left}s")
-        if seconds_left <= 2:
-            st.warning("⏰ HURRY!")
+        time_left = max(0, deadline - time.time())
+        seconds_left = max(0, int(time_left) + (1 if time_left > 0 else 0))
+        progress_value = min(1.0, max(0.0, time_left / 7))
+        st.caption(f"⏱️ {seconds_left}s remaining")
+        st.progress(progress_value)
 
     if current_question:
         if buzzer == "" and steal_turn == "":
@@ -461,21 +483,21 @@ if room_data:
                 if player_role:
                     room_ref.update({
                         "buzzer": player_role,
-                        "turn_deadline": time.time() + 5,
+                        "turn_deadline": time.time() + 7,
                         "feedback": ""
                     })
                     st.rerun()
 
         elif steal_turn:
             if player_role == steal_turn:
-                st.warning("Steal chance! Pick an answer in 5 seconds.")
+                st.warning("Steal chance! Pick an answer in 7 seconds.")
                 render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=True)
             else:
                 st.warning("Other player is attempting the steal.")
 
         else:
             if player_role == buzzer:
-                st.success("You buzzed first! Pick an answer in 5 seconds.")
+                st.success("You buzzed first! Pick an answer in 7 seconds.")
                 render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=False)
             else:
                 st.warning("Other player buzzed first.")
@@ -494,7 +516,7 @@ if room_data:
 
     with col2:
         if st.button("New Game"):
-            reset_room_state(room_ref)
+            reset_room_state(room_ref, room_data.get("selected_week", "All Weeks"))
             st.session_state.room_code = generate_room_code()
             st.rerun()
 
