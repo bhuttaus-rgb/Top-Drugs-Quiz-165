@@ -28,7 +28,6 @@ leaderboard_ref = db.reference("leaderboard")
 st.set_page_config(page_title="War on Drugs", page_icon="💊")
 st.title("War on Drugs")
 
-# Auto-refresh every 1 second so timer/state updates across both players
 st_autorefresh(interval=1000, key="battle_refresh")
 
 # ---------- Room Code Generator ----------
@@ -37,261 +36,65 @@ def generate_room_code():
 
 # ---------- Wrong Answer Messages ----------
 WRONG_MESSAGES = [
-    "Move to Florida 😬",
+    "Oof… that hurt 😬",
     "Dipiro would be disappointed 😭",
-    "Lock in bruh what was that 👀",
-    "My cat would have gotten that 😅",
+    "You might wanna review that one 👀",
+    "Not quite 😅",
     "Pharm police watching 🚨",
     "Are you DA right now 😭"
 ]
 
 # ---------- Master question bank ----------
 MASTER_QUESTIONS = [
-    {
-        "q": "What is the mechanism of action of bisacodyl?",
-        "choices": ["Stimulant laxative", "Stool softener", "Fiber laxative", "Hyperosmotic laxative"],
-        "a": "Stimulant laxative"
-    },
-    {
-        "q": "Which drug is used for IBS and is an antimuscarinic?",
-        "choices": ["Dicyclomine", "Loperamide", "Senna", "Rifaximin"],
-        "a": "Dicyclomine"
-    },
-    {
-        "q": "What is the brand name of docusate?",
-        "choices": ["Colace", "Dulcolax", "Linzess", "Imodium AD"],
-        "a": "Colace"
-    },
-    {
-        "q": "Which drug is a guanylate cyclase agonist?",
-        "choices": ["Linaclotide", "Lubiprostone", "Psyllium", "Polyethylene glycol"],
-        "a": "Linaclotide"
-    },
-    {
-        "q": "Which drug treats diarrhea but does not treat the underlying cause?",
-        "choices": ["Loperamide", "Rifaximin", "Docusate", "Bisacodyl"],
-        "a": "Loperamide"
-    },
-    {
-        "q": "Which drug is a chloride channel activator?",
-        "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Senna"],
-        "a": "Lubiprostone"
-    },
-    {
-        "q": "What is the mechanism of polyethylene glycol?",
-        "choices": ["Hyperosmotic laxative", "Stimulant laxative", "Stool softener", "Antidiarrheal"],
-        "a": "Hyperosmotic laxative"
-    },
-    {
-        "q": "Which drug is a fiber laxative?",
-        "choices": ["Psyllium", "Senna", "Bisacodyl", "Docusate"],
-        "a": "Psyllium"
-    },
-    {
-        "q": "Which drug is used for hepatic encephalopathy prevention?",
-        "choices": ["Rifaximin", "Loperamide", "Lubiprostone", "Dicyclomine"],
-        "a": "Rifaximin"
-    },
-    {
-        "q": "Which drug is a stimulant laxative taken at bedtime?",
-        "choices": ["Senna", "Docusate", "Polyethylene glycol", "Psyllium"],
-        "a": "Senna"
-    },
-    {
-        "q": "Which drug is contraindicated in children recovering from flu or varicella?",
-        "choices": ["Bismuth subsalicylate", "Famotidine", "Omeprazole", "Magnesium hydroxide"],
-        "a": "Bismuth subsalicylate"
-    },
-    {
-        "q": "What class is famotidine?",
-        "choices": ["Histamine H2 antagonist", "Proton pump inhibitor", "Antacid", "Dopamine antagonist"],
-        "a": "Histamine H2 antagonist"
-    },
-    {
-        "q": "Which drug is a probiotic?",
-        "choices": ["Lactobacillus", "Famotidine", "Omeprazole", "Sucralfate"],
-        "a": "Lactobacillus"
-    },
-    {
-        "q": "What is the brand name of magnesium hydroxide?",
-        "choices": ["Milk of Magnesia", "Pepcid", "Prilosec", "Carafate"],
-        "a": "Milk of Magnesia"
-    },
-    {
-        "q": "Which drug has a boxed warning for tardive dyskinesia?",
-        "choices": ["Metoclopramide", "Omeprazole", "Famotidine", "Sucralfate"],
-        "a": "Metoclopramide"
-    },
-    {
-        "q": "Which drug is a proton pump inhibitor?",
-        "choices": ["Omeprazole", "Famotidine", "Sucralfate", "Metoclopramide"],
-        "a": "Omeprazole"
-    },
-    {
-        "q": "Which proton pump inhibitor has Protonix as a brand name?",
-        "choices": ["Pantoprazole", "Omeprazole", "Famotidine", "Sucralfate"],
-        "a": "Pantoprazole"
-    },
-    {
-        "q": "Which drug is used for duodenal ulcer and should be taken on an empty stomach?",
-        "choices": ["Sucralfate", "Famotidine", "Omeprazole", "Magnesium hydroxide"],
-        "a": "Sucralfate"
-    },
-    {
-        "q": "Which topical drug is used for hemorrhoidal pain, burning, or itching?",
-        "choices": ["Phenylephrine topical", "Promethazine", "Pantoprazole", "Famotidine"],
-        "a": "Phenylephrine topical"
-    },
-    {
-        "q": "Which drug is a phenothiazine antihistamine used for nausea and vomiting?",
-        "choices": ["Promethazine", "Diphenhydramine", "Hydroxyzine", "Cetirizine"],
-        "a": "Promethazine"
-    },
-    {
-        "q": "What is the brand name of azelastine?",
-        "choices": ["Astepro", "Zyrtec", "Afrin", "NasalCrom"],
-        "a": "Astepro"
-    },
-    {
-        "q": "Which drug is a mast cell stabilizer?",
-        "choices": ["Cromolyn sodium", "Mometasone", "Oxymetazoline", "Azelastine"],
-        "a": "Cromolyn sodium"
-    },
-    {
-        "q": "Which drug is a cough suppressant that can cause euphoria or hallucinations when abused?",
-        "choices": ["Dextromethorphan", "Guaifenesin", "Diphenhydramine", "Benzonatate"],
-        "a": "Dextromethorphan"
-    },
-    {
-        "q": "What is the brand name of diphenhydramine?",
-        "choices": ["Benadryl", "Zyrtec", "Vistaril", "Mucinex"],
-        "a": "Benadryl"
-    },
-    {
-        "q": "Which drug is an expectorant?",
-        "choices": ["Guaifenesin", "Dextromethorphan", "Diphenhydramine", "Hydroxyzine"],
-        "a": "Guaifenesin"
-    },
-    {
-        "q": "Which drug is a piperazine derivative antihistamine?",
-        "choices": ["Hydroxyzine", "Diphenhydramine", "Cetirizine", "Azelastine"],
-        "a": "Hydroxyzine"
-    },
-    {
-        "q": "What is the brand name of ketotifen ophthalmic?",
-        "choices": ["Zaditor", "Afrin", "Astepro", "Benadryl"],
-        "a": "Zaditor"
-    },
-    {
-        "q": "Which drug is an intranasal corticosteroid?",
-        "choices": ["Mometasone", "Azelastine", "Cromolyn sodium", "Oxymetazoline"],
-        "a": "Mometasone"
-    },
-    {
-        "q": "Which nasal spray should not be used for more than 3 consecutive days?",
-        "choices": ["Oxymetazoline", "Mometasone", "Cromolyn sodium", "Azelastine"],
-        "a": "Oxymetazoline"
-    },
-    {
-        "q": "Which drug should not be chewed because it can cause oral and pharyngeal numbness?",
-        "choices": ["Benzonatate", "Dextromethorphan", "Guaifenesin", "Diphenhydramine"],
-        "a": "Benzonatate"
-    },
-    {
-        "q": "Which drug is used for emergency treatment of acute anaphylaxis?",
-        "choices": ["Epinephrine auto-injector", "Diphenhydramine", "Hydroxyzine", "Cetirizine"],
-        "a": "Epinephrine auto-injector"
-    },
-    {
-        "q": "Which drug is contraindicated with concurrent or recent MAOI use and is used for nasal congestion?",
-        "choices": ["Pseudoephedrine", "Oxymetazoline", "Azelastine", "Mometasone"],
-        "a": "Pseudoephedrine"
-    },
-    {
-        "q": "Which ophthalmic decongestant is contraindicated in narrow-angle glaucoma?",
-        "choices": ["Naphazoline", "Ketotifen", "Azelastine", "Mometasone"],
-        "a": "Naphazoline"
-    },
-    {
-        "q": "Which drug is a sedative alpha-2 agonist used in ICU or procedural sedation?",
-        "choices": ["Dexmedetomidine", "Guanfacine", "Atomoxetine", "Hydroxyzine"],
-        "a": "Dexmedetomidine"
-    },
-    {
-        "q": "What is the brand name of levothyroxine?",
-        "choices": ["Synthroid", "Strattera", "Vyvanse", "Intuniv"],
-        "a": "Synthroid"
-    },
-    {
-        "q": "Which drug has a boxed warning that it is not for weight reduction?",
-        "choices": ["Levothyroxine", "Lisdexamfetamine", "Atomoxetine", "Methylphenidate"],
-        "a": "Levothyroxine"
-    },
-    {
-        "q": "What is the brand name of atomoxetine?",
-        "choices": ["Strattera", "Vyvanse", "Concerta", "Intuniv"],
-        "a": "Strattera"
-    },
-    {
-        "q": "Which drug has a boxed warning for suicidality in children and adolescents?",
-        "choices": ["Atomoxetine", "Guanfacine", "Lisdexamfetamine", "Methylphenidate"],
-        "a": "Atomoxetine"
-    },
-    {
-        "q": "Which drug is an alpha-2 agonist with Intuniv as a brand name?",
-        "choices": ["Guanfacine", "Atomoxetine", "Lisdexamfetamine", "Methylphenidate"],
-        "a": "Guanfacine"
-    },
-    {
-        "q": "What is the brand name of lisdexamfetamine?",
-        "choices": ["Vyvanse", "Concerta", "Strattera", "Intuniv"],
-        "a": "Vyvanse"
-    },
-    {
-        "q": "Which stimulant has a boxed warning for risk of abuse, misuse, and diversion?",
-        "choices": ["Lisdexamfetamine", "Atomoxetine", "Guanfacine", "Hydroxyzine"],
-        "a": "Lisdexamfetamine"
-    },
-    {
-        "q": "Which drug has Concerta and Ritalin as brand names?",
-        "choices": ["Methylphenidate", "Lisdexamfetamine", "Atomoxetine", "Guanfacine"],
-        "a": "Methylphenidate"
-    },
-    {
-        "q": "Which stimulant is also used for narcolepsy?",
-        "choices": ["Methylphenidate", "Atomoxetine", "Guanfacine", "Hydroxyzine"],
-        "a": "Methylphenidate"
-    },
-    {
-        "q": "Which antihistamine is contraindicated in patients with hypersensitivity to hydroxyzine?",
-        "choices": ["Cetirizine", "Diphenhydramine", "Hydroxyzine", "Azelastine"],
-        "a": "Cetirizine"
-    },
-    {
-        "q": "What is the brand name of cetirizine?",
-        "choices": ["Zyrtec", "Astepro", "Benadryl", "Vistaril"],
-        "a": "Zyrtec"
-    },
-    {
-        "q": "Which drug should be taken 1 hour before meals and may restart after 4 months for OTC use?",
-        "choices": ["Omeprazole", "Famotidine", "Sucralfate", "Pantoprazole"],
-        "a": "Omeprazole"
-    },
-    {
-        "q": "Which drug may cause dyspnea or chest tightness with the first dose?",
-        "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Loperamide"],
-        "a": "Lubiprostone"
-    },
-    {
-        "q": "Which drug should be avoided with mineral oil unless approved by a health care provider?",
-        "choices": ["Docusate", "Senna", "Psyllium", "Rifaximin"],
-        "a": "Docusate"
-    },
-    {
-        "q": "Which drug should be separated 2 hours from other medications and dust inhalation should be avoided?",
-        "choices": ["Psyllium", "Bisacodyl", "Docusate", "Loperamide"],
-        "a": "Psyllium"
-    }
+    {"q": "What is the mechanism of action of bisacodyl?", "choices": ["Stimulant laxative", "Stool softener", "Fiber laxative", "Hyperosmotic laxative"], "a": "Stimulant laxative"},
+    {"q": "Which drug is used for IBS and is an antimuscarinic?", "choices": ["Dicyclomine", "Loperamide", "Senna", "Rifaximin"], "a": "Dicyclomine"},
+    {"q": "What is the brand name of docusate?", "choices": ["Colace", "Dulcolax", "Linzess", "Imodium AD"], "a": "Colace"},
+    {"q": "Which drug is a guanylate cyclase agonist?", "choices": ["Linaclotide", "Lubiprostone", "Psyllium", "Polyethylene glycol"], "a": "Linaclotide"},
+    {"q": "Which drug treats diarrhea but does not treat the underlying cause?", "choices": ["Loperamide", "Rifaximin", "Docusate", "Bisacodyl"], "a": "Loperamide"},
+    {"q": "Which drug is a chloride channel activator?", "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Senna"], "a": "Lubiprostone"},
+    {"q": "What is the mechanism of polyethylene glycol?", "choices": ["Hyperosmotic laxative", "Stimulant laxative", "Stool softener", "Antidiarrheal"], "a": "Hyperosmotic laxative"},
+    {"q": "Which drug is a fiber laxative?", "choices": ["Psyllium", "Senna", "Bisacodyl", "Docusate"], "a": "Psyllium"},
+    {"q": "Which drug is used for hepatic encephalopathy prevention?", "choices": ["Rifaximin", "Loperamide", "Lubiprostone", "Dicyclomine"], "a": "Rifaximin"},
+    {"q": "Which drug is a stimulant laxative taken at bedtime?", "choices": ["Senna", "Docusate", "Polyethylene glycol", "Psyllium"], "a": "Senna"},
+    {"q": "Which drug is contraindicated in children recovering from flu or varicella?", "choices": ["Bismuth subsalicylate", "Famotidine", "Omeprazole", "Magnesium hydroxide"], "a": "Bismuth subsalicylate"},
+    {"q": "What class is famotidine?", "choices": ["Histamine H2 antagonist", "Proton pump inhibitor", "Antacid", "Dopamine antagonist"], "a": "Histamine H2 antagonist"},
+    {"q": "Which drug is a probiotic?", "choices": ["Lactobacillus", "Famotidine", "Omeprazole", "Sucralfate"], "a": "Lactobacillus"},
+    {"q": "What is the brand name of magnesium hydroxide?", "choices": ["Milk of Magnesia", "Pepcid", "Prilosec", "Carafate"], "a": "Milk of Magnesia"},
+    {"q": "Which drug has a boxed warning for tardive dyskinesia?", "choices": ["Metoclopramide", "Omeprazole", "Famotidine", "Sucralfate"], "a": "Metoclopramide"},
+    {"q": "Which drug is a proton pump inhibitor?", "choices": ["Omeprazole", "Famotidine", "Sucralfate", "Metoclopramide"], "a": "Omeprazole"},
+    {"q": "Which proton pump inhibitor has Protonix as a brand name?", "choices": ["Pantoprazole", "Omeprazole", "Famotidine", "Sucralfate"], "a": "Pantoprazole"},
+    {"q": "Which drug is used for duodenal ulcer and should be taken on an empty stomach?", "choices": ["Sucralfate", "Famotidine", "Omeprazole", "Magnesium hydroxide"], "a": "Sucralfate"},
+    {"q": "Which topical drug is used for hemorrhoidal pain, burning, or itching?", "choices": ["Phenylephrine topical", "Promethazine", "Pantoprazole", "Famotidine"], "a": "Phenylephrine topical"},
+    {"q": "Which drug is a phenothiazine antihistamine used for nausea and vomiting?", "choices": ["Promethazine", "Diphenhydramine", "Hydroxyzine", "Cetirizine"], "a": "Promethazine"},
+    {"q": "What is the brand name of azelastine?", "choices": ["Astepro", "Zyrtec", "Afrin", "NasalCrom"], "a": "Astepro"},
+    {"q": "Which drug is a mast cell stabilizer?", "choices": ["Cromolyn sodium", "Mometasone", "Oxymetazoline", "Azelastine"], "a": "Cromolyn sodium"},
+    {"q": "Which drug is a cough suppressant that can cause euphoria or hallucinations when abused?", "choices": ["Dextromethorphan", "Guaifenesin", "Diphenhydramine", "Benzonatate"], "a": "Dextromethorphan"},
+    {"q": "What is the brand name of diphenhydramine?", "choices": ["Benadryl", "Zyrtec", "Vistaril", "Mucinex"], "a": "Benadryl"},
+    {"q": "Which drug is an expectorant?", "choices": ["Guaifenesin", "Dextromethorphan", "Diphenhydramine", "Hydroxyzine"], "a": "Guaifenesin"},
+    {"q": "Which drug is a piperazine derivative antihistamine?", "choices": ["Hydroxyzine", "Diphenhydramine", "Cetirizine", "Azelastine"], "a": "Hydroxyzine"},
+    {"q": "What is the brand name of ketotifen ophthalmic?", "choices": ["Zaditor", "Afrin", "Astepro", "Benadryl"], "a": "Zaditor"},
+    {"q": "Which drug is an intranasal corticosteroid?", "choices": ["Mometasone", "Azelastine", "Cromolyn sodium", "Oxymetazoline"], "a": "Mometasone"},
+    {"q": "Which nasal spray should not be used for more than 3 consecutive days?", "choices": ["Oxymetazoline", "Mometasone", "Cromolyn sodium", "Azelastine"], "a": "Oxymetazoline"},
+    {"q": "Which drug should not be chewed because it can cause oral and pharyngeal numbness?", "choices": ["Benzonatate", "Dextromethorphan", "Guaifenesin", "Diphenhydramine"], "a": "Benzonatate"},
+    {"q": "Which drug is used for emergency treatment of acute anaphylaxis?", "choices": ["Epinephrine auto-injector", "Diphenhydramine", "Hydroxyzine", "Cetirizine"], "a": "Epinephrine auto-injector"},
+    {"q": "Which drug is contraindicated with concurrent or recent MAOI use and is used for nasal congestion?", "choices": ["Pseudoephedrine", "Oxymetazoline", "Azelastine", "Mometasone"], "a": "Pseudoephedrine"},
+    {"q": "Which ophthalmic decongestant is contraindicated in narrow-angle glaucoma?", "choices": ["Naphazoline", "Ketotifen", "Azelastine", "Mometasone"], "a": "Naphazoline"},
+    {"q": "Which drug is a sedative alpha-2 agonist used in ICU or procedural sedation?", "choices": ["Dexmedetomidine", "Guanfacine", "Atomoxetine", "Hydroxyzine"], "a": "Dexmedetomidine"},
+    {"q": "What is the brand name of levothyroxine?", "choices": ["Synthroid", "Strattera", "Vyvanse", "Intuniv"], "a": "Synthroid"},
+    {"q": "Which drug has a boxed warning that it is not for weight reduction?", "choices": ["Levothyroxine", "Lisdexamfetamine", "Atomoxetine", "Methylphenidate"], "a": "Levothyroxine"},
+    {"q": "What is the brand name of atomoxetine?", "choices": ["Strattera", "Vyvanse", "Concerta", "Intuniv"], "a": "Strattera"},
+    {"q": "Which drug has a boxed warning for suicidality in children and adolescents?", "choices": ["Atomoxetine", "Guanfacine", "Lisdexamfetamine", "Methylphenidate"], "a": "Atomoxetine"},
+    {"q": "Which drug is an alpha-2 agonist with Intuniv as a brand name?", "choices": ["Guanfacine", "Atomoxetine", "Lisdexamfetamine", "Methylphenidate"], "a": "Guanfacine"},
+    {"q": "What is the brand name of lisdexamfetamine?", "choices": ["Vyvanse", "Concerta", "Strattera", "Intuniv"], "a": "Vyvanse"},
+    {"q": "Which stimulant has a boxed warning for risk of abuse, misuse, and diversion?", "choices": ["Lisdexamfetamine", "Atomoxetine", "Guanfacine", "Hydroxyzine"], "a": "Lisdexamfetamine"},
+    {"q": "Which drug has Concerta and Ritalin as brand names?", "choices": ["Methylphenidate", "Lisdexamfetamine", "Atomoxetine", "Guanfacine"], "a": "Methylphenidate"},
+    {"q": "Which stimulant is also used for narcolepsy?", "choices": ["Methylphenidate", "Atomoxetine", "Guanfacine", "Hydroxyzine"], "a": "Methylphenidate"},
+    {"q": "Which antihistamine is contraindicated in patients with hypersensitivity to hydroxyzine?", "choices": ["Cetirizine", "Diphenhydramine", "Hydroxyzine", "Azelastine"], "a": "Cetirizine"},
+    {"q": "What is the brand name of cetirizine?", "choices": ["Zyrtec", "Astepro", "Benadryl", "Vistaril"], "a": "Zyrtec"},
+    {"q": "Which drug should be taken 1 hour before meals and may restart after 4 months for OTC use?", "choices": ["Omeprazole", "Famotidine", "Sucralfate", "Pantoprazole"], "a": "Omeprazole"},
+    {"q": "Which drug may cause dyspnea or chest tightness with the first dose?", "choices": ["Lubiprostone", "Linaclotide", "Psyllium", "Loperamide"], "a": "Lubiprostone"},
+    {"q": "Which drug should be avoided with mineral oil unless approved by a health care provider?", "choices": ["Docusate", "Senna", "Psyllium", "Rifaximin"], "a": "Docusate"},
+    {"q": "Which drug should be separated 2 hours from other medications and dust inhalation should be avoided?", "choices": ["Psyllium", "Bisacodyl", "Docusate", "Loperamide"], "a": "Psyllium"}
 ]
 
 # ---------- Helpers ----------
@@ -315,6 +118,7 @@ def reset_room_state(room_ref):
         "turn_deadline": 0,
         "winner_recorded": False,
         "feedback": "",
+        "rope_position": 0,
         "questions": build_game_questions()
     })
 
@@ -330,7 +134,6 @@ def get_player_name(room_data, role):
 def record_win(winner_name):
     if not winner_name:
         return
-
     player_ref = leaderboard_ref.child(winner_name)
     data = player_ref.get()
 
@@ -367,24 +170,27 @@ if leaderboard:
     col1.metric("Players", total_players)
     col2.metric("Total Wins", total_wins)
 
-    medals = {1: "🥇", 2: "🥈", 3: "🥉"}
+    medals = ["🥇", "🥈", "🥉"]
 
-    for i, player in enumerate(leaderboard[:10], start=1):
-        badge = medals.get(i, f"{i}.")
+    for i, player in enumerate(leaderboard[:3]):
         st.markdown(
             f"""
             <div style="
-                padding:10px 14px;
-                margin-bottom:8px;
-                border:1px solid #e6e6e6;
-                border-radius:12px;
+                padding:12px 16px;
+                margin-bottom:10px;
+                border-radius:14px;
+                background: linear-gradient(90deg, #111827, #1f2937);
+                color:white;
                 display:flex;
                 justify-content:space-between;
                 align-items:center;
-                background-color:#fafafa;
             ">
-                <div style="font-size:18px;">{badge} <b>{player['name']}</b></div>
-                <div style="font-size:16px;"><b>{player['wins']}</b> win(s)</div>
+                <div style="font-size:20px;">
+                    {medals[i]} <b>{player['name']}</b>
+                </div>
+                <div style="font-size:18px;">
+                    {player['wins']} wins
+                </div>
             </div>
             """,
             unsafe_allow_html=True
@@ -423,6 +229,7 @@ if st.button("Join Room"):
                 "turn_deadline": 0,
                 "winner_recorded": False,
                 "feedback": "",
+                "rope_position": 0,
                 "questions": build_game_questions()
             })
             st.success(f"{name} joined {room} as Player 1")
@@ -434,17 +241,14 @@ if st.button("Join Room"):
 
             if player1 == name or player2 == name:
                 st.success(f"{name} rejoined {room}")
-
             elif not player1:
                 room_ref.update({"player1": name})
                 st.success(f"{name} joined {room} as Player 1")
                 st.rerun()
-
             elif not player2:
                 room_ref.update({"player2": name})
                 st.success(f"{name} joined {room} as Player 2")
                 st.rerun()
-
             else:
                 st.error("Room is full.")
 
@@ -496,6 +300,41 @@ if room_data:
     st.write("Score 1:", room_data.get("score1", 0))
     st.write("Score 2:", room_data.get("score2", 0))
 
+    # Tug of war
+    rope_position = room_data.get("rope_position", 0)
+    rope_position = max(-5, min(5, rope_position))
+    rope_percent = ((rope_position + 5) / 10) * 100
+
+    st.write("### Tug of War")
+    st.markdown(
+        f"""
+        <div style="display:flex; justify-content:space-between; font-weight:600; margin-bottom:6px;">
+            <span>🟦 {room_data.get('player1', 'Player 1')}</span>
+            <span>{room_data.get('player2', 'Player 2')} 🟥</span>
+        </div>
+
+        <div style="
+            width:100%;
+            height:28px;
+            background:#e5e7eb;
+            border-radius:14px;
+            position:relative;
+            overflow:hidden;
+            margin-bottom:10px;
+        ">
+            <div style="
+                position:absolute;
+                left:{rope_percent}%;
+                top:0;
+                transform:translateX(-50%);
+                font-size:22px;
+                line-height:28px;
+            ">🪢</div>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
     feedback = room_data.get("feedback", "")
     if feedback:
         if "correct" in feedback.lower():
@@ -519,27 +358,38 @@ if room_data:
 
         p1 = room_data.get("score1", 0)
         p2 = room_data.get("score2", 0)
+        rope_position = room_data.get("rope_position", 0)
 
-        if p1 > p2:
+        if rope_position <= -5:
             winner_name = room_data.get("player1", "Player 1")
-
             if not room_data.get("winner_recorded", False):
                 record_win(winner_name)
                 room_ref.update({"winner_recorded": True})
-
+            st.balloons()
+            st.success(f"🏆 {winner_name} wins the tug of war!")
+            st.markdown("### 🟦🪢💥 🟥 dropped the rope!")
+        elif rope_position >= 5:
+            winner_name = room_data.get("player2", "Player 2")
+            if not room_data.get("winner_recorded", False):
+                record_win(winner_name)
+                room_ref.update({"winner_recorded": True})
+            st.balloons()
+            st.success(f"🏆 {winner_name} wins the tug of war!")
+            st.markdown("### 🟥🪢💥 🟦 dropped the rope!")
+        elif p1 > p2:
+            winner_name = room_data.get("player1", "Player 1")
+            if not room_data.get("winner_recorded", False):
+                record_win(winner_name)
+                room_ref.update({"winner_recorded": True})
             st.balloons()
             st.success(f"🏆 {winner_name} wins!")
-
         elif p2 > p1:
             winner_name = room_data.get("player2", "Player 2")
-
             if not room_data.get("winner_recorded", False):
                 record_win(winner_name)
                 room_ref.update({"winner_recorded": True})
-
             st.balloons()
             st.success(f"🏆 {winner_name} wins!")
-
         else:
             st.info("🤝 It's a tie!")
 
@@ -571,7 +421,6 @@ if room_data:
         elif steal_turn:
             if player_role == steal_turn:
                 st.warning("Steal chance! Pick an answer in 5 seconds.")
-
                 for i, choice in enumerate(current_question["choices"]):
                     if st.button(choice, key=f"steal_{q_index}_{i}"):
                         if choice.lower() == current_question["a"].lower():
@@ -582,7 +431,8 @@ if room_data:
                                     "buzzer": "",
                                     "steal_turn": "",
                                     "turn_deadline": 0,
-                                    "feedback": f"{name} got it correct! ✅"
+                                    "feedback": f"{name} got it correct! ✅",
+                                    "rope_position": room_data.get("rope_position", 0) - 1
                                 })
                             else:
                                 room_ref.update({
@@ -591,7 +441,8 @@ if room_data:
                                     "buzzer": "",
                                     "steal_turn": "",
                                     "turn_deadline": 0,
-                                    "feedback": f"{name} got it correct! ✅"
+                                    "feedback": f"{name} got it correct! ✅",
+                                    "rope_position": room_data.get("rope_position", 0) + 1
                                 })
                         else:
                             room_ref.update({
@@ -608,7 +459,6 @@ if room_data:
         else:
             if player_role == buzzer:
                 st.success("You buzzed first! Pick an answer in 5 seconds.")
-
                 for i, choice in enumerate(current_question["choices"]):
                     if st.button(choice, key=f"buzz_{q_index}_{i}"):
                         if choice.lower() == current_question["a"].lower():
@@ -619,7 +469,8 @@ if room_data:
                                     "buzzer": "",
                                     "steal_turn": "",
                                     "turn_deadline": 0,
-                                    "feedback": f"{name} got it correct! ✅"
+                                    "feedback": f"{name} got it correct! ✅",
+                                    "rope_position": room_data.get("rope_position", 0) - 1
                                 })
                             else:
                                 room_ref.update({
@@ -628,7 +479,8 @@ if room_data:
                                     "buzzer": "",
                                     "steal_turn": "",
                                     "turn_deadline": 0,
-                                    "feedback": f"{name} got it correct! ✅"
+                                    "feedback": f"{name} got it correct! ✅",
+                                    "rope_position": room_data.get("rope_position", 0) + 1
                                 })
                         else:
                             room_ref.update({
