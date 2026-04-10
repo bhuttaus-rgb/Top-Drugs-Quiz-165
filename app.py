@@ -206,7 +206,7 @@ def build_game_questions(selected_week="All Weeks", num_questions=10):
 
     return selected
 
-def reset_room_state(room_ref, selected_week):
+def reset_room_state(room_ref, selected_week, game_mode):
     room_ref.update({
         "score1": 0,
         "score2": 0,
@@ -218,6 +218,7 @@ def reset_room_state(room_ref, selected_week):
         "feedback": "",
         "rope_position": 0,
         "selected_week": selected_week,
+        "game_mode": game_mode,
         "questions": build_game_questions(selected_week)
     })
 
@@ -257,38 +258,50 @@ def get_leaderboard():
     rows.sort(key=lambda x: x["wins"], reverse=True)
     return rows
 
-def render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=False):
+def render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=False, solo_mode=False):
     cols = st.columns(2)
 
     for i, choice in enumerate(current_question["choices"]):
         col = cols[i % 2]
 
         with col:
-            button_key = f"{'steal' if is_steal else 'buzz'}_{q_index}_{i}"
+            button_key = f"{'solo' if solo_mode else ('steal' if is_steal else 'buzz')}_{q_index}_{i}"
             if st.button(choice, key=button_key, use_container_width=True):
                 if choice.lower() == current_question["a"].lower():
-                    if player_role == "player1":
+                    if solo_mode:
                         room_ref.update({
                             "score1": room_data.get("score1", 0) + 1,
                             "current_question": q_index + 1,
-                            "buzzer": "",
-                            "steal_turn": "",
-                            "turn_deadline": 0,
-                            "feedback": f"{name} got it correct! ✅",
-                            "rope_position": room_data.get("rope_position", 0) - 1
+                            "feedback": f"{name} got it correct! ✅"
                         })
                     else:
-                        room_ref.update({
-                            "score2": room_data.get("score2", 0) + 1,
-                            "current_question": q_index + 1,
-                            "buzzer": "",
-                            "steal_turn": "",
-                            "turn_deadline": 0,
-                            "feedback": f"{name} got it correct! ✅",
-                            "rope_position": room_data.get("rope_position", 0) + 1
-                        })
+                        if player_role == "player1":
+                            room_ref.update({
+                                "score1": room_data.get("score1", 0) + 1,
+                                "current_question": q_index + 1,
+                                "buzzer": "",
+                                "steal_turn": "",
+                                "turn_deadline": 0,
+                                "feedback": f"{name} got it correct! ✅",
+                                "rope_position": room_data.get("rope_position", 0) - 1
+                            })
+                        else:
+                            room_ref.update({
+                                "score2": room_data.get("score2", 0) + 1,
+                                "current_question": q_index + 1,
+                                "buzzer": "",
+                                "steal_turn": "",
+                                "turn_deadline": 0,
+                                "feedback": f"{name} got it correct! ✅",
+                                "rope_position": room_data.get("rope_position", 0) + 1
+                            })
                 else:
-                    if is_steal:
+                    if solo_mode:
+                        room_ref.update({
+                            "current_question": q_index + 1,
+                            "feedback": random.choice(WRONG_MESSAGES)
+                        })
+                    elif is_steal:
                         room_ref.update({
                             "current_question": q_index + 1,
                             "buzzer": "",
@@ -354,6 +367,7 @@ if "room_code" not in st.session_state:
 room = st.text_input("Room code", value=st.session_state.room_code).strip().upper()
 selected_week_label = st.selectbox("Choose a week", list(WEEK_OPTIONS.keys()))
 selected_week = WEEK_OPTIONS[selected_week_label]
+game_mode = st.selectbox("Mode", ["Battle Mode", "Solo Practice"])
 st.caption("Share this room code with your opponent")
 
 # ---------- Join Room ----------
@@ -380,6 +394,7 @@ if st.button("Join Room"):
                 "feedback": "",
                 "rope_position": 0,
                 "selected_week": selected_week,
+                "game_mode": game_mode,
                 "questions": build_game_questions(selected_week)
             })
             st.success(f"{name} joined {room} as Player 1")
@@ -391,6 +406,8 @@ if st.button("Join Room"):
 
             if player1 == name or player2 == name:
                 st.success(f"{name} rejoined {room}")
+            elif room_data.get("game_mode") == "Solo Practice":
+                st.error("Solo Practice is for one player only.")
             elif not player1:
                 room_ref.update({"player1": name})
                 st.success(f"{name} joined {room} as Player 1")
@@ -415,76 +432,82 @@ if room_data:
 # ---------- Main Game ----------
 if room_data:
     room_ref = rooms_ref.child(room)
+    current_mode = room_data.get("game_mode", "Battle Mode")
 
-    now = time.time()
-    buzzer = room_data.get("buzzer", "")
-    steal_turn = room_data.get("steal_turn", "")
-    deadline = room_data.get("turn_deadline", 0)
+    if current_mode == "Battle Mode":
+        now = time.time()
+        buzzer = room_data.get("buzzer", "")
+        steal_turn = room_data.get("steal_turn", "")
+        deadline = room_data.get("turn_deadline", 0)
 
-    if deadline and now > deadline:
-        if steal_turn:
-            room_ref.update({
-                "current_question": room_data.get("current_question", 0) + 1,
-                "buzzer": "",
-                "steal_turn": "",
-                "turn_deadline": 0,
-                "feedback": "Time's up! Moving to the next question ⏭️"
-            })
-            st.rerun()
-        elif buzzer:
-            room_ref.update({
-                "steal_turn": other_player(buzzer),
-                "turn_deadline": time.time() + 7,
-                "feedback": "⚡ Steal opportunity!"
-            })
-            st.rerun()
+        if deadline and now > deadline:
+            if steal_turn:
+                room_ref.update({
+                    "current_question": room_data.get("current_question", 0) + 1,
+                    "buzzer": "",
+                    "steal_turn": "",
+                    "turn_deadline": 0,
+                    "feedback": "Time's up! Moving to the next question ⏭️"
+                })
+                st.rerun()
+            elif buzzer:
+                room_ref.update({
+                    "steal_turn": other_player(buzzer),
+                    "turn_deadline": time.time() + 7,
+                    "feedback": "⚡ Steal opportunity!"
+                })
+                st.rerun()
 
     room_data = room_ref.get()
     buzzer = room_data.get("buzzer", "")
     steal_turn = room_data.get("steal_turn", "")
     deadline = room_data.get("turn_deadline", 0)
+    current_mode = room_data.get("game_mode", "Battle Mode")
 
     st.subheader(f"Room: {room}")
+    st.write("Mode:", current_mode)
     st.write("Week:", WEEK_DISPLAY.get(room_data.get("selected_week", "All Weeks"), "All Weeks — Mixed Review"))
     st.write("Player 1:", room_data.get("player1", ""))
-    st.write("Player 2:", room_data.get("player2", ""))
+    if current_mode == "Battle Mode":
+        st.write("Player 2:", room_data.get("player2", ""))
     st.write("Score 1:", room_data.get("score1", 0))
-    st.write("Score 2:", room_data.get("score2", 0))
+    if current_mode == "Battle Mode":
+        st.write("Score 2:", room_data.get("score2", 0))
 
-    # Tug of war
-    rope_position = room_data.get("rope_position", 0)
-    rope_position = max(-5, min(5, rope_position))
-    rope_percent = ((rope_position + 5) / 10) * 100
+    if current_mode == "Battle Mode":
+        rope_position = room_data.get("rope_position", 0)
+        rope_position = max(-5, min(5, rope_position))
+        rope_percent = ((rope_position + 5) / 10) * 100
 
-    st.write("### Tug of War")
-    st.markdown(
-        f"""
-        <div style="display:flex; justify-content:space-between; font-weight:600; margin-bottom:6px;">
-            <span>🟦 {room_data.get('player1', 'Player 1')}</span>
-            <span>{room_data.get('player2', 'Player 2')} 🟥</span>
-        </div>
+        st.write("### Tug of War")
+        st.markdown(
+            f"""
+            <div style="display:flex; justify-content:space-between; font-weight:600; margin-bottom:6px;">
+                <span>🟦 {room_data.get('player1', 'Player 1')}</span>
+                <span>{room_data.get('player2', 'Player 2')} 🟥</span>
+            </div>
 
-        <div style="
-            width:100%;
-            height:28px;
-            background:#e5e7eb;
-            border-radius:14px;
-            position:relative;
-            overflow:hidden;
-            margin-bottom:10px;
-        ">
             <div style="
-                position:absolute;
-                left:{rope_percent}%;
-                top:0;
-                transform:translateX(-50%);
-                font-size:22px;
-                line-height:28px;
-            ">🪢</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+                width:100%;
+                height:28px;
+                background:#e5e7eb;
+                border-radius:14px;
+                position:relative;
+                overflow:hidden;
+                margin-bottom:10px;
+            ">
+                <div style="
+                    position:absolute;
+                    left:{rope_percent}%;
+                    top:0;
+                    transform:translateX(-50%);
+                    font-size:22px;
+                    line-height:28px;
+                ">🪢</div>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
 
     feedback = room_data.get("feedback", "")
     if feedback:
@@ -509,96 +532,110 @@ if room_data:
 
         p1 = room_data.get("score1", 0)
         p2 = room_data.get("score2", 0)
-        rope_position = room_data.get("rope_position", 0)
 
-        if rope_position <= -5:
-            winner_name = room_data.get("player1", "Player 1")
-            if not room_data.get("winner_recorded", False):
-                record_win(winner_name)
-                room_ref.update({"winner_recorded": True})
-            st.balloons()
-            st.success(f"🏆 {winner_name} wins the tug of war!")
-            st.markdown("### 🟦🪢💥 🟥 dropped the rope!")
-        elif rope_position >= 5:
-            winner_name = room_data.get("player2", "Player 2")
-            if not room_data.get("winner_recorded", False):
-                record_win(winner_name)
-                room_ref.update({"winner_recorded": True})
-            st.balloons()
-            st.success(f"🏆 {winner_name} wins the tug of war!")
-            st.markdown("### 🟥🪢💥 🟦 dropped the rope!")
-        elif p1 > p2:
-            winner_name = room_data.get("player1", "Player 1")
-            if not room_data.get("winner_recorded", False):
-                record_win(winner_name)
-                room_ref.update({"winner_recorded": True})
-            st.balloons()
-            st.success(f"🏆 {winner_name} wins!")
-        elif p2 > p1:
-            winner_name = room_data.get("player2", "Player 2")
-            if not room_data.get("winner_recorded", False):
-                record_win(winner_name)
-                room_ref.update({"winner_recorded": True})
-            st.balloons()
-            st.success(f"🏆 {winner_name} wins!")
+        if current_mode == "Solo Practice":
+            st.success(f"Practice complete. Final score: {p1}/{len(questions)}")
         else:
-            st.info("🤝 It's a tie!")
+            rope_position = room_data.get("rope_position", 0)
 
-    if buzzer:
-        st.write(f"⚡ {get_player_name(room_data, buzzer)} buzzed!")
-    else:
-        st.write("Buzzer: None")
+            if rope_position <= -5:
+                winner_name = room_data.get("player1", "Player 1")
+                if not room_data.get("winner_recorded", False):
+                    record_win(winner_name)
+                    room_ref.update({"winner_recorded": True})
+                st.balloons()
+                st.success(f"🏆 {winner_name} wins the tug of war!")
+                st.markdown("### 🟦🪢💥 🟥 dropped the rope!")
+            elif rope_position >= 5:
+                winner_name = room_data.get("player2", "Player 2")
+                if not room_data.get("winner_recorded", False):
+                    record_win(winner_name)
+                    room_ref.update({"winner_recorded": True})
+                st.balloons()
+                st.success(f"🏆 {winner_name} wins the tug of war!")
+                st.markdown("### 🟥🪢💥 🟦 dropped the rope!")
+            elif p1 > p2:
+                winner_name = room_data.get("player1", "Player 1")
+                if not room_data.get("winner_recorded", False):
+                    record_win(winner_name)
+                    room_ref.update({"winner_recorded": True})
+                st.balloons()
+                st.success(f"🏆 {winner_name} wins!")
+            elif p2 > p1:
+                winner_name = room_data.get("player2", "Player 2")
+                if not room_data.get("winner_recorded", False):
+                    record_win(winner_name)
+                    room_ref.update({"winner_recorded": True})
+                st.balloons()
+                st.success(f"🏆 {winner_name} wins!")
+            else:
+                st.info("🤝 It's a tie!")
 
-    if steal_turn:
-        st.write("Steal Turn:", player_label(steal_turn))
+    if current_mode == "Battle Mode":
+        if buzzer:
+            st.write(f"⚡ {get_player_name(room_data, buzzer)} buzzed!")
+        else:
+            st.write("Buzzer: None")
 
-    if deadline and current_question and (buzzer or steal_turn):
-        time_left = max(0, deadline - time.time())
-        seconds_left = max(0, int(time_left) + (1 if time_left > 0 else 0))
-        progress_value = min(1.0, max(0.0, time_left / 7))
-        st.caption(f"⏱️ {seconds_left}s remaining")
-        st.progress(progress_value)
+        if steal_turn:
+            st.write("Steal Turn:", player_label(steal_turn))
+
+        if deadline and current_question and (buzzer or steal_turn):
+            time_left = max(0, deadline - time.time())
+            seconds_left = max(0, int(time_left) + (1 if time_left > 0 else 0))
+            progress_value = min(1.0, max(0.0, time_left / 7))
+            st.caption(f"⏱️ {seconds_left}s remaining")
+            st.progress(progress_value)
 
     if current_question:
-        if buzzer == "" and steal_turn == "":
-            if st.button("🔴 Buzz"):
-                if player_role:
-                    room_ref.update({
-                        "buzzer": player_role,
-                        "turn_deadline": time.time() + 7,
-                        "feedback": ""
-                    })
-                    st.rerun()
-
-        elif steal_turn:
-            if player_role == steal_turn:
-                st.warning("Steal chance! Pick an answer in 7 seconds.")
-                render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=True)
-            else:
-                st.warning("Other player is attempting the steal.")
+        if current_mode == "Solo Practice":
+            render_choice_grid(current_question, q_index, "player1", room_ref, room_data, name, solo_mode=True)
 
         else:
-            if player_role == buzzer:
-                st.success("You buzzed first! Pick an answer in 7 seconds.")
-                render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=False)
+            if buzzer == "" and steal_turn == "":
+                if st.button("🔴 Buzz"):
+                    if player_role:
+                        room_ref.update({
+                            "buzzer": player_role,
+                            "turn_deadline": time.time() + 7,
+                            "feedback": ""
+                        })
+                        st.rerun()
+
+            elif steal_turn:
+                if player_role == steal_turn:
+                    st.warning("Steal chance! Pick an answer in 7 seconds.")
+                    render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=True)
+                else:
+                    st.warning("Other player is attempting the steal.")
+
             else:
-                st.warning("Other player buzzed first.")
+                if player_role == buzzer:
+                    st.success("You buzzed first! Pick an answer in 7 seconds.")
+                    render_choice_grid(current_question, q_index, player_role, room_ref, room_data, name, is_steal=False)
+                else:
+                    st.warning("Other player buzzed first.")
 
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("Reset Buzzer"):
-            room_ref.update({
-                "buzzer": "",
-                "steal_turn": "",
-                "turn_deadline": 0,
-                "feedback": ""
-            })
-            st.rerun()
+        if current_mode == "Battle Mode":
+            if st.button("Reset Buzzer"):
+                room_ref.update({
+                    "buzzer": "",
+                    "steal_turn": "",
+                    "turn_deadline": 0,
+                    "feedback": ""
+                })
+                st.rerun()
 
     with col2:
         if st.button("New Game"):
-            reset_room_state(room_ref, room_data.get("selected_week", "All Weeks"))
+            reset_room_state(
+                room_ref,
+                room_data.get("selected_week", "All Weeks"),
+                room_data.get("game_mode", "Battle Mode")
+            )
             st.session_state.room_code = generate_room_code()
             st.rerun()
 
