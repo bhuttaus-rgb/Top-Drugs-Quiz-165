@@ -40,7 +40,7 @@ WRONG_MESSAGES = [
     "You might wanna review that one 👀",
     "Not quite 😅",
     "Pharm police watching 🚨",
-    "Are you DA right now 😭"
+    "Are you DA right now 😭",
 ]
 
 # ---------- Week Labels ----------
@@ -50,6 +50,10 @@ WEEK_OPTIONS = {
     "Week 2 — GI: GERD / Antacids": "Week 2",
     "Week 3 — Cough / Cold / Allergy": "Week 3",
     "Week 4 — ADHD / Cognitive / Misc.": "Week 4",
+    "Week 5 — Alzheimer’s / Parkinson’s / Sleep": "Week 5",
+    "Week 6 — Depression / Anxiety / Bipolar": "Week 6",
+    "Week 7 — Seizures / Anxiety": "Week 7",
+    "Week 8 — Substance Use / Mood / Pain / Migraine": "Week 8",
 }
 
 WEEK_DISPLAY = {
@@ -58,6 +62,10 @@ WEEK_DISPLAY = {
     "Week 2": "Week 2 — GI: GERD / Antacids",
     "Week 3": "Week 3 — Cough / Cold / Allergy",
     "Week 4": "Week 4 — ADHD / Cognitive / Misc.",
+    "Week 5": "Week 5 — Alzheimer’s / Parkinson’s / Sleep",
+    "Week 6": "Week 6 — Depression / Anxiety / Bipolar",
+    "Week 7": "Week 7 — Seizures / Anxiety",
+    "Week 8": "Week 8 — Substance Use / Mood / Pain / Migraine",
 }
 
 # ---------- Question Banks ----------
@@ -187,16 +195,91 @@ WEEK_4_QUESTIONS = [
     {"q": "Which drug should avoid late evening doses and can be opened into soft food?", "choices": ["Methylphenidate", "Atomoxetine", "Guanfacine", "Levothyroxine"], "a": "Methylphenidate"},
 ]
 
+WEEK_5_QUESTIONS = [
+    {"q": "Which drug is an anticholinergic used for parkinsonism and extrapyramidal symptoms?", "choices": ["Benztropine", "Donepezil", "Memantine", "Ropinirole"], "a": "Benztropine"},
+    {"q": "Which drug has Sinemet as a brand name?", "choices": ["Carbidopa/Levodopa", "Ropinirole", "Benztropine", "Donepezil"], "a": "Carbidopa/Levodopa"},
+    {"q": "Which drug is a central cholinesterase inhibitor used in Alzheimer disease?", "choices": ["Donepezil", "Memantine", "Melatonin", "Modafinil"], "a": "Donepezil"},
+    {"q": "Which herbal product should be discontinued before surgery and dental procedures?", "choices": ["Ginkgo biloba", "Melatonin", "St. John's Wort", "Echinacea"], "a": "Ginkgo biloba"},
+    {"q": "Which drug has Antivert as a brand name?", "choices": ["Meclizine", "Melatonin", "Modafinil", "Zolpidem"], "a": "Meclizine"},
+    {"q": "Which supplement is commonly used 3 to 6 hours before sleep for insomnia?", "choices": ["Melatonin", "Meclizine", "Modafinil", "Memantine"], "a": "Melatonin"},
+    {"q": "Which drug has Namenda as a brand name?", "choices": ["Memantine", "Donepezil", "Modafinil", "Benztropine"], "a": "Memantine"},
+    {"q": "Which drug has Provigil as a brand name?", "choices": ["Modafinil", "Zolpidem", "Ropinirole", "Melatonin"], "a": "Modafinil"},
+    {"q": "Which drug is a dopamine agonist used for Parkinson disease and restless leg syndrome?", "choices": ["Ropinirole", "Benztropine", "Donepezil", "Carbidopa/Levodopa"], "a": "Ropinirole"},
+    {"q": "Which drug has Ambien as a brand name?", "choices": ["Zolpidem", "Modafinil", "Melatonin", "Meclizine"], "a": "Zolpidem"},
+    {"q": "Which drug has a boxed warning for complex sleep behaviors?", "choices": ["Zolpidem", "Modafinil", "Melatonin", "Donepezil"], "a": "Zolpidem"},
+    {"q": "Which drug should be taken on an empty stomach before bedtime and avoided with alcohol?", "choices": ["Zolpidem", "Melatonin", "Meclizine", "Ropinirole"], "a": "Zolpidem"},
+]
+
+WEEK_6_QUESTIONS = [
+    {"q": "Which antidepressant is a tricyclic antidepressant?", "choices": ["Amitriptyline", "Duloxetine", "Escitalopram", "Sertraline"], "a": "Amitriptyline"},
+    {"q": "Which drug has Abilify as a brand name?", "choices": ["Aripiprazole", "Olanzapine", "Risperidone", "Trazodone"], "a": "Aripiprazole"},
+    {"q": "Which drug is an SNRI used for anxiety, depression, and diabetic neuropathy?", "choices": ["Duloxetine", "Escitalopram", "Fluoxetine", "Mirtazapine"], "a": "Duloxetine"},
+    {"q": "Which drug has Lexapro as a brand name?", "choices": ["Escitalopram", "Fluoxetine", "Sertraline", "Trazodone"], "a": "Escitalopram"},
+    {"q": "Which SSRI has Prozac as a brand name?", "choices": ["Fluoxetine", "Escitalopram", "Sertraline", "Vilazodone"], "a": "Fluoxetine"},
+    {"q": "Which antidepressant commonly causes increased appetite and weight gain?", "choices": ["Mirtazapine", "Fluoxetine", "Escitalopram", "Sertraline"], "a": "Mirtazapine"},
+    {"q": "Which drug has Zyprexa as a brand name?", "choices": ["Olanzapine", "Aripiprazole", "Risperidone", "Trazodone"], "a": "Olanzapine"},
+    {"q": "Which antipsychotic is a benzisoxazole derivative?", "choices": ["Risperidone", "Olanzapine", "Aripiprazole", "Mirtazapine"], "a": "Risperidone"},
+    {"q": "Which SSRI has Zoloft as a brand name?", "choices": ["Sertraline", "Fluoxetine", "Escitalopram", "Trazodone"], "a": "Sertraline"},
+    {"q": "Which antidepressant is associated with priapism counseling?", "choices": ["Trazodone", "Mirtazapine", "Fluoxetine", "Duloxetine"], "a": "Trazodone"},
+    {"q": "Which drug has a boxed warning for mortality in elderly patients with dementia-related psychosis?", "choices": ["Olanzapine", "Aripiprazole", "Risperidone", "All of the above"], "a": "All of the above"},
+    {"q": "Which antidepressant should usually be taken in the morning?", "choices": ["Fluoxetine", "Mirtazapine", "Trazodone", "Amitriptyline"], "a": "Fluoxetine"},
+]
+
+WEEK_7_QUESTIONS = [
+    {"q": "Which benzodiazepine has Xanax as a brand name?", "choices": ["Alprazolam", "Clonazepam", "Lorazepam", "Buspirone"], "a": "Alprazolam"},
+    {"q": "Which drug is a serotonin 5-HT1A partial agonist used for anxiety?", "choices": ["Buspirone", "Alprazolam", "Clonazepam", "Lorazepam"], "a": "Buspirone"},
+    {"q": "Which anticonvulsant has Tegretol as a brand name?", "choices": ["Carbamazepine", "Lamotrigine", "Levetiracetam", "Phenytoin"], "a": "Carbamazepine"},
+    {"q": "Which anticonvulsant has a boxed warning for agranulocytosis and aplastic anemia?", "choices": ["Carbamazepine", "Lamotrigine", "Levetiracetam", "Oxcarbazepine"], "a": "Carbamazepine"},
+    {"q": "Which benzodiazepine has Klonopin as a brand name?", "choices": ["Clonazepam", "Alprazolam", "Lorazepam", "Buspirone"], "a": "Clonazepam"},
+    {"q": "Which anticonvulsant has a boxed warning for serious skin reactions?", "choices": ["Lamotrigine", "Carbamazepine", "Phenytoin", "Levetiracetam"], "a": "Lamotrigine"},
+    {"q": "Which anticonvulsant has Keppra as a brand name?", "choices": ["Levetiracetam", "Lamotrigine", "Phenytoin", "Oxcarbazepine"], "a": "Levetiracetam"},
+    {"q": "Which benzodiazepine has Ativan as a brand name?", "choices": ["Lorazepam", "Clonazepam", "Alprazolam", "Buspirone"], "a": "Lorazepam"},
+    {"q": "Which anticonvulsant has Trileptal as a brand name?", "choices": ["Oxcarbazepine", "Phenytoin", "Lamotrigine", "Carbamazepine"], "a": "Oxcarbazepine"},
+    {"q": "Which anticonvulsant has Dilantin as a brand name?", "choices": ["Phenytoin", "Levetiracetam", "Lamotrigine", "Oxcarbazepine"], "a": "Phenytoin"},
+    {"q": "Which herbal product is associated with photosensitivity and many drug interactions?", "choices": ["St. John's Wort", "Ginkgo biloba", "Melatonin", "Echinacea"], "a": "St. John's Wort"},
+    {"q": "Which antidepressant is an SSRI/5-HT1A partial agonist?", "choices": ["Vilazodone", "Sertraline", "Fluoxetine", "Escitalopram"], "a": "Vilazodone"},
+]
+
+WEEK_8_QUESTIONS = [
+    {"q": "Which drug has Suboxone as a brand name?", "choices": ["Buprenorphine/Naloxone", "Naloxone", "Bupropion", "Varenicline"], "a": "Buprenorphine/Naloxone"},
+    {"q": "Which drug is used for opioid use disorder and is a partial agonist/antagonist combination?", "choices": ["Buprenorphine/Naloxone", "Naloxone", "Gabapentin", "Lithium"], "a": "Buprenorphine/Naloxone"},
+    {"q": "Which antidepressant also helps with smoking cessation?", "choices": ["Bupropion", "Duloxetine", "Sertraline", "Vilazodone"], "a": "Bupropion"},
+    {"q": "Which drug has a boxed warning for hepatotoxicity, pancreatitis, and teratogenicity?", "choices": ["Divalproex", "Lithium", "Gabapentin", "Topiramate"], "a": "Divalproex"},
+    {"q": "Which drug has Neurontin as a brand name?", "choices": ["Gabapentin", "Pregabalin", "Topiramate", "Naloxone"], "a": "Gabapentin"},
+    {"q": "Which drug has Lithobid as a brand name?", "choices": ["Lithium", "Divalproex", "Bupropion", "Gabapentin"], "a": "Lithium"},
+    {"q": "Which drug requires lithium level monitoring?", "choices": ["Lithium", "Topiramate", "Pregabalin", "Bupropion"], "a": "Lithium"},
+    {"q": "Which drug has Narcan as a brand name?", "choices": ["Naloxone", "Nicotine", "Buprenorphine/Naloxone", "Sumatriptan"], "a": "Naloxone"},
+    {"q": "Which drug immediately reverses opioid overdose?", "choices": ["Naloxone", "Buprenorphine/Naloxone", "Gabapentin", "Lithium"], "a": "Naloxone"},
+    {"q": "Which smoking cessation aid includes Nicorette and Nicoderm CQ?", "choices": ["Nicotine", "Varenicline", "Bupropion", "Naloxone"], "a": "Nicotine"},
+    {"q": "Which drug has Lyrica as a brand name?", "choices": ["Pregabalin", "Gabapentin", "Topiramate", "Divalproex"], "a": "Pregabalin"},
+    {"q": "Which antimigraine serotonin receptor agonist has Imitrex as a brand name?", "choices": ["Sumatriptan", "Topiramate", "Divalproex", "Pregabalin"], "a": "Sumatriptan"},
+    {"q": "Which anticonvulsant has Topamax as a brand name?", "choices": ["Topiramate", "Divalproex", "Gabapentin", "Pregabalin"], "a": "Topiramate"},
+    {"q": "Which smoking cessation partial nicotine agonist has Chantix as a brand name?", "choices": ["Varenicline", "Nicotine", "Bupropion", "Naloxone"], "a": "Varenicline"},
+]
+
 QUESTION_BANK = {
-    "All Weeks": WEEK_1_QUESTIONS + WEEK_2_QUESTIONS + WEEK_3_QUESTIONS + WEEK_4_QUESTIONS,
+    "All Weeks": (
+        WEEK_1_QUESTIONS
+        + WEEK_2_QUESTIONS
+        + WEEK_3_QUESTIONS
+        + WEEK_4_QUESTIONS
+        + WEEK_5_QUESTIONS
+        + WEEK_6_QUESTIONS
+        + WEEK_7_QUESTIONS
+        + WEEK_8_QUESTIONS
+    ),
     "Week 1": WEEK_1_QUESTIONS,
     "Week 2": WEEK_2_QUESTIONS,
     "Week 3": WEEK_3_QUESTIONS,
     "Week 4": WEEK_4_QUESTIONS,
+    "Week 5": WEEK_5_QUESTIONS,
+    "Week 6": WEEK_6_QUESTIONS,
+    "Week 7": WEEK_7_QUESTIONS,
+    "Week 8": WEEK_8_QUESTIONS,
 }
 
 # ---------- Helpers ----------
-def build_game_questions(selected_week="All Weeks", num_questions=10):
+def build_game_questions(selected_week="All Weeks", num_questions=15):
     pool = [dict(q) for q in QUESTION_BANK[selected_week]]
     random.shuffle(pool)
     selected = pool[:min(num_questions, len(pool))]
